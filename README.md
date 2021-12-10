@@ -31,6 +31,6 @@ Goal of Project
   
   <h3>API List</h3>
   <ul>
-    <li>Google Sheets API <a href="https://developers.google.com/sheets/api/quickstart/python"></a></li>
+    <li><a href="https://developers.google.com/sheets/api/quickstart/python">Google Sheets API</a></li>
   </ul>
 </section>
