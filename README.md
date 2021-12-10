@@ -35,6 +35,7 @@ Goal of Project
   <h3>API List</h3>
   <ul>
     <li><a href="https://developers.google.com/sheets/api/quickstart/python">Google Sheets API</a></li>
+    <li><a href="https://discordpy.readthedocs.io/en/stable/api.html">Discord API</a></li>
   </ul>
 </section>
 
