@@ -21,3 +21,15 @@ Goal of Project
     </p>
 
 </section>
+
+<section>
+  <h2>Resources and API's</h2>
+  <h3>Recources</h3>
+  <ul>
+  </ul>
+  
+  <h3>API List</h3>
+  <ul>
+    <li>Google Sheets API <a href="https://developers.google.com/sheets/api/quickstart/python"></a></li>
+  </ul>
+</section>
