@@ -24,7 +24,8 @@ Goal of Project
 
 <section>
   <h2>Resources and API's</h2>
-  <h3>Recources</h3>
+  
+  <h3>Recource List</h3>
   <ul>
   </ul>
   
