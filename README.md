@@ -30,6 +30,7 @@ Goal of Project
   <ul>
     <li><a href="https://www.freecodecamp.org/news/git-and-github-crash-course/">GitHub crash course</a></li>
     <li><a href="https://www.git-tower.com/">Git-Tower</a></li>
+    <li><a href="https://discord.com/developers/applications">Discord Developer</a></li>
   </ul>
   
   <h3>API List</h3>
