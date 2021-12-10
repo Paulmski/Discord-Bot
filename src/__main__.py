@@ -1,17 +1,12 @@
 # file app/__main__.py
 
 def main():
-    import datetime
-    import requests
-    import math
     from discord.ext.commands import Bot
-    import time
-    import json
     import random
+    import secrets
 
 
     bot = Bot(command_prefix='!')
-
 
 
 
@@ -33,6 +28,10 @@ def main():
             await ctx.channel.send('Heads!')
         elif rand == 1:
             await ctx.channel.send('Tails!')
+
+
+    bot.run(secrets.secretToken)
+
     
 
 
