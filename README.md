@@ -28,12 +28,13 @@ Goal of Project
   
   <h3>Recource List</h3>
   <ul>
-    <li>GitHub crash course: <a href="https://www.freecodecamp.org/news/git-and-github-crash-course/">https://www.freecodecamp.org/news/git-and-github-crash-course/</a></li>
+    <li><a href="https://www.freecodecamp.org/news/git-and-github-crash-course/">GitHub crash course</a></li>
+    <li><a href="https://www.git-tower.com/">Git-Tower</a></li>
   </ul>
   
   <h3>API List</h3>
   <ul>
-    <li>Google Sheets API: <a href="https://developers.google.com/sheets/api/quickstart/python">https://developers.google.com/sheets/api/quickstart/python</a></li>
+    <li><a href="https://developers.google.com/sheets/api/quickstart/python">Google Sheets API</a></li>
   </ul>
 </section>
 
