@@ -36,7 +36,7 @@ def main():
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
 
-    #Run bot
+    #Run botdd
     bot.run(secrets.secretToken)
 
     
