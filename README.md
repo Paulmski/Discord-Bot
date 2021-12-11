@@ -31,6 +31,7 @@ Goal of Project
     <li><a href="https://www.freecodecamp.org/news/git-and-github-crash-course/">GitHub crash course</a></li>
     <li><a href="https://www.git-tower.com/">Git-Tower</a></li>
     <li><a href="https://discord.com/developers/applications">Discord Developer</a></li>
+    <li><a href="https://www.freecodecamp.org/news/create-a-discord-bot-with-python/">Code a Discord Bot</a></li>
   </ul>
   
   <h3>API List</h3>
