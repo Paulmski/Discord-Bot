@@ -3,7 +3,18 @@
 ## Welcome to Discord-Bot!
 Thank you for your interest in contributing to the Lakehead CS 2021 Guild's Discord-Bot project!
 
-We wish to see your contribution to this project, no matter your skill level! This document will help walk you through getting started, setting up the Discord bot on your own server, and how you can contribute from here on out.
+We wish to see your contribution to this project, no matter your skill level! This document will help walk you through getting started, the rules for this repo, setting up the Discord bot on your own server, and how you can contribute from here on out.
+
+## Table of Contents
+___
+[Getting Started](#Getting-Started)
+
+[Rules](#Rules)
+
+[Testing the Bot](#Testing-the-Bot)
+
+[Methods of Contribution](#List-of-Ways-You-Can-Contribute)
+
 
 ## Getting Started
 ___
@@ -17,6 +28,18 @@ Before getting started with Git, it's best to read up and learn the basic comman
 * [discord.py Programming Follow-Along](https://www.freecodecamp.org/news/create-a-discord-bot-with-python/)
 
 Assuming you already know Python, you should also refer to the [discord.py documentation](https://discordpy.readthedocs.io/en/stable/ext/commands/) when debugging, refactoring, or programming.
+
+## Rules
+___
+For this project, we are looking to uphold Git etiquette and good workflow.
+
+1. Whenever you want to make changes to the project, please fork the project.
+
+2. Make sure you work in the `develop` branch or new branch when making changes in your fork.
+3. **Do not make pull requests to the `main` branch**.
+4. Pull requests should always be for the `develop` branch.
+
+Sometimes pull requests will be denied or revised. This is only the nature of the project; changes and optimizations need to be made before it can be incorporated into the main branch.
 
 ## Testing the Bot
 ___
