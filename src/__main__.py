@@ -1,7 +1,6 @@
 # file app/__main__.py
 
 def main():
-    import discord
     from discord.ext.commands import Bot
     import discord.utils
     import random
