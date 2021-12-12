@@ -59,9 +59,9 @@ def main():
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
 
-    # Run the bot using the secretToken parameter from secrets.py.
+    # Run the bot using the DISCORD_TOKEN constant from secrets.py.
     # For devs running their own version of the bot, create a secrets.py file to the src directory, and put the DISCORD_TOKEN as a variable.
-    # Remember not to add the secrets.env file when comitting/pushing.
+    # Remember not to add the secrets.py file when comitting/pushing.
     bot.run(secrets.DISCORD_TOKEN)
 
 if __name__ == '__main__':
