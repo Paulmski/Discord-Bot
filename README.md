@@ -20,7 +20,7 @@ Discord-Bot uses several Python modules bundled with discord.py. You can choose 
 
 ## Resources and API's
   
-### Recource List
+### Resource List
 * [discord.py Bot Command Documentation](https://discordpy.readthedocs.io/en/stable/ext/commands/)
 * [GitHub Crash Course](https://www.freecodecamp.org/news/git-and-github-crash-course/)
 * [Git-Tower (Free Account for Students With Student Card)](https://www.freecodecamp.org/news/git-and-github-crash-course/)
