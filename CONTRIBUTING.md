@@ -14,6 +14,34 @@ Before getting started with Git, it's best to read up and learn the basic comman
 * [GitHub Crash Course](https://www.freecodecamp.org/news/git-and-github-crash-course/)
 * [GitHub SSH Key Generation Tutorial](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent)
 * [Branch Naming Convention and Workflow](https://gist.github.com/digitaljhelms/4287848)
+* [discord.py Programming Follow-Along](https://www.freecodecamp.org/news/create-a-discord-bot-with-python/)
+
+Assuming you already know Python, you should also refer to the [discord.py documentation](https://discordpy.readthedocs.io/en/stable/ext/commands/) when debugging, refactoring, or programming.
+
+## Testing the Bot
+___
+You can run your own version of the bot from a repl.it project or from your local machine.
+
+### Creating a Bot Account
+Firstly, create a Discord Bot Account through your [Applications page](https://discord.com/developers/applications). Give it an appropriate name and description. 
+
+### Letting the Bot Into Your Test Server
+Once you have done that, make sure to create a OAuth2 URL to invite your bot to your test server.
+
+Go to OAuth2 > URL Generator and select `bot` as the scope. You should then give the bot the appropriate server permissions. The URL to invite your bot a server _you_ own will be at the bottom of the page.
+
+### Token Generation
+You will also need the bot `TOKEN` to run the bot on your local machine/repl.it.
+
+This can be generated from Build-A-Bot under the Bot menu.
+Create your bot, give it a name, and click `Click to Reveal Token` to see your bot's token. 
+
+Do not share this token with anyone or the public (think of it as an RSA private key). If it does get leaked, you can always regenerate a new token from the same menu. 
+
+### Token Association
+Create a file called `secrets.py` in the src folder and assign the token as a String to a constant called `DISCORD_TOKEN`.
+
+When you commit and push changes to your fork, do not add `secrets.py`. Although `.gitignore` does this for you, do not forcibly add it anyways.
 
 ## List of Ways You Can Contribute
 ___
