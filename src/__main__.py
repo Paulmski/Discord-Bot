@@ -1,6 +1,7 @@
 # file app/__main__.py
 
 def main():
+    import discord
     from discord.ext.commands import Bot
     import discord.utils
     import random
@@ -21,7 +22,7 @@ def main():
     async def on_connect():
         print("--Connected to server--")
 
-    # Flip a coin and return to the user what the result was.
+    # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
     async def coinflip(ctx):
         rand = random.choice([0,6000])
