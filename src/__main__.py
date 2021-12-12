@@ -7,6 +7,8 @@ def main():
     import random
     import secrets
 
+    random.seed() # Seed the RNG.
+    
     bot = Bot(command_prefix='!')
 
     # Prints the bot information upon bootup.
@@ -30,7 +32,7 @@ def main():
         suggests "that the probability of an American nickel landing on edge is approximately 1 in 6000 tosses."
         Murray, Daniel B., and Scott W. Teare. “Probability of a Tossed Coin Landing on Edge.” Physical Review E, vol. 48, no. 4, 1993, pp. 2547–2552., https://doi.org/10.1103/physreve.48.2547. 
         '''
-        rand = random.choice([0,6000])
+        rand = random.randint(0, 6000)
         if rand == 420:
             responses = ['Holy cow, it landed on it\'s side!', 'You won\'t believe this but it landed on its side!', 'Despite all odds, it landed on it\'s side!']
             random_response = random.choice([0, len(responses)])
