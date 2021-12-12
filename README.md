@@ -13,7 +13,7 @@ You can run your own version of the bot from a repl.it project or from your loca
 
 You will also need the bot token, which can be generated from the Build-A-Bot menu under Bot. Create a file called `secrets.py` in the src folder and store the token as a String constant called `DISCORD_TOKEN`. When making commits, do not add this file.
 
-See `CONTRIBUTING.md` for more details on contributions and pull request rules.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on contributions and pull request rules.
 
 ### Dependencies
 Discord-Bot uses several Python modules bundled with discord.py. You can choose to install all the required dependencies at once using `pip3 install -r requirements.txt`.
