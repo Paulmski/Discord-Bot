@@ -30,6 +30,20 @@ def main():
         def __init__(self):
             self.fetch_due_dates.start()
 
+        # Declare a function to unload fetch_due_date cog.
+        def cog_unload(self):
+            self.fetch_due_dates.cancel()
+
+        # fetch_due_dates loop.
+        @tasks.loop(seconds=15.0)
+        async def fetch_due_dates(self):
+            # TODO: Use Google Sheets API to fetch due dates.
+            pass
+
+        @fetch_due_dates.before_loop
+        async def before_fetch(self):
+            print("Fetching due dates...")
+
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
     async def coinflip(ctx):
