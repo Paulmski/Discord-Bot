@@ -35,14 +35,18 @@ def main():
             self.fetch_due_dates.cancel()
 
         # fetch_due_dates loop.
-        @tasks.loop(seconds=15.0)
+        @tasks.loop(seconds=10.0)
         async def fetch_due_dates(self):
+            print("Fetching due dates...")
             # TODO: Use Google Sheets API to fetch due dates.
             pass
 
         @fetch_due_dates.before_loop
         async def before_fetch(self):
-            print("Fetching due dates...")
+            print("Initiating date fetching.")
+
+    # Instantiate FetchDate class.
+    fetcher = FetchDate()
 
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
