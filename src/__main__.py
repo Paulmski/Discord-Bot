@@ -9,6 +9,7 @@ def main():
     import secrets
     import os
     from dotenv import load_dotenv
+    from datetime import datetime
     
     from googleapiclient.discovery import build
     from google_auth_oauthlib.flow import InstalledAppFlow
@@ -25,7 +26,7 @@ def main():
     SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
     RANGE_NAME = os.getenv("RANGE_NAME")
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-    ANNOUNCEMENTS = int(os.getenv("ANNOUNCEMENTS"))
+    ANNOUNCEMENT_CHANNEL = os.getenv("ANNOUNCEMENT_CHANNEL")
 
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is created automatically when the authorization flow completes for the first time.
@@ -70,7 +71,7 @@ def main():
             self.fetch_due_dates.cancel()
 
         # fetch_due_dates loop.
-        @tasks.loop(seconds=10.0)
+        @tasks.loop(minutes=1.0)
         async def fetch_due_dates(self):
             print("Fetching due dates...")
 
@@ -85,8 +86,8 @@ def main():
 
             # Otherwise, send a message to @everyone about what assignments are due within a week.
             else:
-                header = values[0]             # Header row with column names (A1:E1)
-                current_class = values[1][0]   # Name of the first class.
+
+                header = values[0] # Header row with column names (A1:E1)
 
                 # Grab the indexes of the headers from A1:E1.
                 index = {
@@ -97,6 +98,7 @@ def main():
                     'Notes': header.index('Notes')
                 }
 
+                # Declare assignments dictionary, will become an argument for announce_due_dates().
                 assignments = {}
 
                 for row in values[1:]:
@@ -104,8 +106,7 @@ def main():
                     try:
                         # If the class name has changed from the A column, change the current_class variable.
                         if row[index['Course Name']] != '':
-                            current_class = row[index['Course Name']]
-                            assignments[current_class] = []
+                            course = row[index['Course Name']]
 
                         # Assign the assignment name, due date, and days until due date.
                         assignment = row[index['Assignment Name']]
@@ -122,12 +123,12 @@ def main():
 
                         # If the assignment is due in a week, add it to the final message to @everyone.
                         if int(days_left) >= 0 and int(days_left) <= 7:
-                            # print(current_class, assignment, due_date, days_left, notes)
-                            assignments[current_class].append([assignment, due_date, days_left, notes])
+                            if course not in assignments.keys():
+                                assignments[course] = []
+                            assignments[course].append([assignment, due_date, days_left, notes])
                     
-                    # Otherwise, print the row that caused the error.
+                    # Otherwise, pass.
                     except IndexError:
-                        #print("Faulty row: ", row)
                         pass
             
             # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
@@ -142,10 +143,34 @@ def main():
 
     # Declare a function to send an announcement to a hard-coded channel number in .env.
     @bot.event
-    async def announce_due_dates(due_dictionary):
-        await bot.wait_until_ready()
-        channel = bot.get_channel(ANNOUNCEMENTS)
-        await channel.send("@everyone booba")
+    async def announce_due_dates(due_date_dictionary):
+        # Preface with @everyone header.
+        message = "@everyone\n__DUE DATES FOR TODAY__\n\n"
+
+        await bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
+        
+        # If ANNOUNCEMENT_CHANNEL is in .env, send to the channel ID. Otherwise, send to a channel called #announcements.
+        if type(ANNOUNCEMENT_CHANNEL) != None:
+            channel = bot.get_channel(int(ANNOUNCEMENT_CHANNEL))
+        else:
+            channel = discord.utils.get(bot.get_all_channels(), name="announcements")
+
+        # For every course in the due date dictionary...
+        for course in due_date_dictionary.keys():
+            message += f"> {course}\n\n"
+            for assignment in due_date_dictionary[course]:
+
+                # Parse the information from the assignment list.
+                name = assignment[0]
+                due_date = assignment[1]
+                days_left = assignment[2]
+                notes = assignment[3]
+
+                # Append the information to the final message.
+                message += f"**{name}**\n\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n__Notes:__\n{notes}\n\n"
+        
+        # Send the message to the annoucements channel.
+        await channel.send(message)
 
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
