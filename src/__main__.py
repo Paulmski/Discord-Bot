@@ -3,6 +3,7 @@
 def main():
 
     from discord.ext.commands import Bot
+    from discord.ext import tasks, commands
     import discord.utils
     import random
     import secrets
@@ -23,6 +24,11 @@ def main():
     @bot.event
     async def on_connect():
         print("--Connected to server--")
+
+    # Declare the FetchDate class, inheriting methods from Cog.
+    class FetchDate(commands.Cog):
+        def __init__(self):
+            self.fetch_due_dates.start()
 
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
@@ -60,8 +66,8 @@ def main():
         await ctx.send(arg)
 
     # Run the bot using the DISCORD_TOKEN constant from secrets.py.
-    # For devs running their own version of the bot, create a secrets.py file to the src directory, and put the DISCORD_TOKEN as a variable.
-    # Remember not to add the secrets.py file when comitting/pushing.
+    # For developers running their own version of the bot, create a secrets.py file to the src directory, and put the DISCORD_TOKEN as a variable.
+    # Remember not to add the secrets.py file when committing/pushing.
     bot.run(secrets.DISCORD_TOKEN)
 
 if __name__ == '__main__':
