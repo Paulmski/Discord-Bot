@@ -73,8 +73,8 @@ def main():
         def cog_unload(self):
             self.fetch_due_dates.cancel()
 
-        # Declare the fetch_due_dates loop.
-        @tasks.loop(minutes=1.0)
+        # Declare the fetch_due_dates loop. Loop will run every 24 hours.
+        @tasks.loop(hours=24.0)
         async def fetch_due_dates(self):
             print("Fetching due dates...")
 
@@ -141,14 +141,11 @@ def main():
         async def before_fetch(self):
             print("Initiating data fetching.")
 
-    # Instantiate FetchDate class.
-    fetcher = FetchDate()
-
     # Declare a function to send an announcement to a hard-coded channel number in .env.
     @bot.event
     async def announce_due_dates(due_date_dictionary):
         # Preface with @everyone header.
-        message = "@everyone\n__DUE DATES FOR TODAY__\n\n"
+        message = "@everyone\n*Due Dates For Today!*\n\n"
 
         await bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
         
@@ -170,7 +167,10 @@ def main():
                 notes = assignment[3]
 
                 # Append the information to the final message.
-                message += f"**{name}**\n\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n__Notes:__\n{notes}\n\n"
+                if notes == "":
+                    message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n\n"
+                else:
+                    message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n__Notes:__\n{notes}\n\n"
         
         # Send the message to the announcements channel.
         await channel.send(message)
@@ -207,6 +207,9 @@ def main():
     @bot.command()
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
+
+    # Instantiate FetchDate class.
+    fetcher = FetchDate()
 
     # Run the bot using the DISCORD_TOKEN constant from .env.
     # For developers running their own version of the bot, create a file called .env in the src directory, and assign the bot's token as a String to a constant called DISCORD_TOKEN.
