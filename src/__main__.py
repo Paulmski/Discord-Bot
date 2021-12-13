@@ -7,6 +7,16 @@ def main():
     import discord.utils
     import random
     import secrets
+    
+    from googleapiclient.discovery import build
+    from google_auth_oauthlib.flow import InstalledAppFlow
+    from google.auth.transport.requests import Request
+    from google.oauth2.credentials import Credentials
+
+    # Enforcing read only scope for Google Sheets API.
+    # Add the Google Sheets spreadsheet to secrets.py.
+    SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+    SPREADSHEET_ID = secrets.SPREADSHEET_ID
 
     random.seed() # Seed the RNG.
     
