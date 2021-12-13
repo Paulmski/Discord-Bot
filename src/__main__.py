@@ -1,6 +1,7 @@
 # file app/__main__.py
 
 def main():
+
     from discord.ext.commands import Bot
     import discord.utils
     import random
@@ -10,7 +11,7 @@ def main():
     
     bot = Bot(command_prefix='!')
 
-    # Prints the bot information upon bootup.
+    # Print the bot information upon bootup.
     @bot.event
     async def on_ready():
         print('Logged in as')
@@ -18,7 +19,7 @@ def main():
         print(bot.user.id)
         print('------')
      
-    # Prints that the bot is connected to the server.
+    # Print that the bot is connected to the server.
     @bot.event
     async def on_connect():
         print("--Connected to server--")
@@ -32,7 +33,7 @@ def main():
         Murray, Daniel B., and Scott W. Teare. “Probability of a Tossed Coin Landing on Edge.” Physical Review E, vol. 48, no. 4, 1993, pp. 2547–2552., https://doi.org/10.1103/physreve.48.2547. 
         '''
         rand = random.randint(0, 6000)
-        if rand == 420:
+        if rand == 777:
             responses = ['Holy cow, it landed on it\'s side!', 'You won\'t believe this but it landed on its side!', 'Despite all odds, it landed on it\'s side!']
             random_response = random.choice([0, len(responses)])
             await ctx.channel.send(responses[random_response])
