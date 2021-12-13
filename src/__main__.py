@@ -5,10 +5,24 @@ def main():
     import discord.utils
     import random
     import secrets
+    from neuralintents import GenericAssistant
+    
 
     random.seed() # Seed the RNG.
     
     bot = Bot(command_prefix='!')
+    
+    chatbot = GenericAssistant("intents.json")
+    chatbot.train_model()
+    chatbot.save_model()
+    
+    @bot.event
+    async def on_message(message):
+        if message.author == bot.user:
+            return
+        if message.content.startswith("$ai"):
+            response = chatbot.request(message.content[4:])
+            await message.channel.send(response)
 
     # Prints the bot information upon bootup.
     @bot.event
@@ -45,10 +59,8 @@ def main():
     @bot.command(pass_context=True)
     async def announce(ctx, subCommand: str, subSubCommand: str, arg: str):
         # Used to configure settings related to this command.
-        if (subCommand == 'config'):
-            
+        if (subCommand == 'config' and subSubCommand == 'channel'):
             # Used to configure which channel the bot should make announcements too.
-            if (subSubCommand == 'channel'):
                 # TODO:(Allow for the ability to modify channel for announcement)
                 channel = discord.utils.get(ctx.guild.channels, name=arg)
                 await channel.send('This is the new announcement channel.')
@@ -60,7 +72,7 @@ def main():
 
     # Run the bot using the DISCORD_TOKEN constant from secrets.py.
     # For devs running their own version of the bot, create a secrets.py file to the src directory, and put the DISCORD_TOKEN as a variable.
-    # Remember not to add the secrets.py file when comitting/pushing.
+    # Remember not to add the secrets.py file when committing/pushing.
     bot.run(secrets.DISCORD_TOKEN)
 
 if __name__ == '__main__':
