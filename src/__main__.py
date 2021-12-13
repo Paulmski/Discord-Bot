@@ -6,6 +6,7 @@ def main():
     from discord.ext import tasks, commands
     import discord.utils
     import random
+    import secrets
     import os
     from dotenv import load_dotenv
     
@@ -24,13 +25,13 @@ def main():
     SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
     RANGE_NAME = os.getenv("RANGE_NAME")
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+    ANNOUNCEMENTS = int(os.getenv("ANNOUNCEMENTS"))
 
     creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first
-    # time.
+    # The file token.json stores the user's access and refresh tokens, and is created automatically when the authorization flow completes for the first time.
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
@@ -38,7 +39,7 @@ def main():
         else:
             flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
             creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
+        # Save the credentials for the next run.
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
@@ -72,15 +73,79 @@ def main():
         @tasks.loop(seconds=10.0)
         async def fetch_due_dates(self):
             print("Fetching due dates...")
-            # TODO: Use Google Sheets API to fetch due dates.
-            pass
+
+            # Use Google Sheets API to fetch due dates.
+            sheet = service.spreadsheets()
+            result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
+            values = result.get('values', [])
+
+            # If no data was received, do not force any messages to be sent. 
+            if not values:
+                print('No data found.')
+
+            # Otherwise, send a message to @everyone about what assignments are due within a week.
+            else:
+                header = values[0]             # Header row with column names (A1:E1)
+                current_class = values[1][0]   # Name of the first class.
+
+                # Grab the indexes of the headers from A1:E1.
+                index = {
+                    'Course Name': header.index('Course Name'),
+                    'Assignment Name': header.index('Assignment Name'),
+                    'Due Date': header.index('Due Date'),
+                    'Days Until Due Date': header.index('Days Until Due Date'),
+                    'Notes': header.index('Notes')
+                }
+
+                assignments = {}
+
+                for row in values[1:]:
+                    # Should there be no IndexError raised...
+                    try:
+                        # If the class name has changed from the A column, change the current_class variable.
+                        if row[index['Course Name']] != '':
+                            current_class = row[index['Course Name']]
+                            assignments[current_class] = []
+
+                        # Assign the assignment name, due date, and days until due date.
+                        assignment = row[index['Assignment Name']]
+                        due_date = row[index['Due Date']]
+                        days_left = row[index['Days Until Due Date']]
+
+                        # If there are notes in this row, assign the value to notes.
+                        if len(row) == 5:
+                            notes = row[index['Notes']]
+
+                        # Otherwise, just assign it as a blank value.
+                        else:
+                            notes = ""
+
+                        # If the assignment is due in a week, add it to the final message to @everyone.
+                        if int(days_left) >= 0 and int(days_left) <= 7:
+                            # print(current_class, assignment, due_date, days_left, notes)
+                            assignments[current_class].append([assignment, due_date, days_left, notes])
+                    
+                    # Otherwise, print the row that caused the error.
+                    except IndexError:
+                        #print("Faulty row: ", row)
+                        pass
+            
+            # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
+            await announce_due_dates(assignments)
 
         @fetch_due_dates.before_loop
         async def before_fetch(self):
-            print("Initiating date fetching.")
+            print("Initiating data fetching.")
 
     # Instantiate FetchDate class.
     fetcher = FetchDate()
+
+    # Declare a function to send an announcement to a hard-coded channel number in .env.
+    @bot.event
+    async def announce_due_dates(due_dictionary):
+        await bot.wait_until_ready()
+        channel = bot.get_channel(ANNOUNCEMENTS)
+        await channel.send("@everyone booba")
 
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
