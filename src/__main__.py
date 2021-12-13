@@ -28,6 +28,7 @@ def main():
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
     ANNOUNCEMENT_CHANNEL = os.getenv("ANNOUNCEMENT_CHANNEL")
 
+    # Establish a connection to the Google Sheets API.
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is created automatically when the authorization flow completes for the first time.
     if os.path.exists('token.json'):
@@ -169,7 +170,7 @@ def main():
                 # Append the information to the final message.
                 message += f"**{name}**\n\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n__Notes:__\n{notes}\n\n"
         
-        # Send the message to the annoucements channel.
+        # Send the message to the announcements channel.
         await channel.send(message)
 
     # Flip a coin and tell the user what the result was.
