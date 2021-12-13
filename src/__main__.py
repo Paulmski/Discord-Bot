@@ -6,20 +6,24 @@ def main():
     from discord.ext import tasks, commands
     import discord.utils
     import random
-    import secrets
+    import os
+    from dotenv import load_dotenv
     
     from googleapiclient.discovery import build
     from google_auth_oauthlib.flow import InstalledAppFlow
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
 
-    # Enforcing read only scope for Google Sheets API.
-    # Add the Google Sheets spreadsheet to secrets.py.
-    SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-    SPREADSHEET_ID = secrets.SPREADSHEET_ID
-
     random.seed() # Seed the RNG.
-    
+    load_dotenv()
+
+    # Enforcing read only scope for Google Sheets API.
+    SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
+
+    # Getting environment variables.
+    SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
+    DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+
     bot = Bot(command_prefix='!')
 
     # Print the bot information upon bootup.
@@ -96,7 +100,7 @@ def main():
     # Run the bot using the DISCORD_TOKEN constant from secrets.py.
     # For developers running their own version of the bot, create a secrets.py file to the src directory, and put the DISCORD_TOKEN as a variable.
     # Remember not to add the secrets.py file when committing/pushing.
-    bot.run(secrets.DISCORD_TOKEN)
+    bot.run(DISCORD_TOKEN)
 
 if __name__ == '__main__':
   main()
