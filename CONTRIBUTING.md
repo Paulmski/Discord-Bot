@@ -1,4 +1,3 @@
-
 # Contribution Guidelines
 
 ## Welcome to Discord-Bot!
