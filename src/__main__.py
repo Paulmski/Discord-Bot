@@ -45,8 +45,10 @@ def main():
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
+    # Build the Google Sheets API service.
     service = build('sheets', 'v4', credentials=creds)
 
+    # Instantiate the bot, with the ! prefix preferred.
     bot = Bot(command_prefix='!')
 
     # Print the bot information upon bootup.
@@ -208,9 +210,9 @@ def main():
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
 
-    # Run the bot using the DISCORD_TOKEN constant from secrets.py.
-    # For developers running their own version of the bot, create a secrets.py file to the src directory, and put the DISCORD_TOKEN as a variable.
-    # Remember not to add the secrets.py file when committing/pushing.
+    # Run the bot using the DISCORD_TOKEN constant from .env.
+    # For developers running their own version of the bot, create a file called .env in the src directory, and assign the bot's token as a String to a constant called DISCORD_TOKEN.
+    # Remember not to add the .env file when committing/pushing.
     bot.run(DISCORD_TOKEN)
 
 if __name__ == '__main__':
