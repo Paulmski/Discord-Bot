@@ -74,8 +74,10 @@ def main():
             self.fetch_due_dates.cancel()
 
         # Declare the fetch_due_dates loop. Loop will run every 24 hours.
-        @tasks.loop(hours=24.0)
+        @tasks.loop(minutes=30.0)
         async def fetch_due_dates(self):
+            if (datetime.now().hour != 6):
+                return
             print("Fetching due dates...")
 
             # Use Google Sheets API to fetch due dates.
@@ -150,7 +152,7 @@ def main():
         await bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
         
         # If ANNOUNCEMENT_CHANNEL is in .env, send to the channel ID. Otherwise, send to a channel called #announcements.
-        if type(ANNOUNCEMENT_CHANNEL) != None:
+        if ANNOUNCEMENT_CHANNEL != None:
             channel = bot.get_channel(int(ANNOUNCEMENT_CHANNEL))
         else:
             channel = discord.utils.get(bot.get_all_channels(), name="announcements")
