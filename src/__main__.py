@@ -15,6 +15,7 @@ def main():
     from google_auth_oauthlib.flow import InstalledAppFlow
     from google.auth.transport.requests import Request
     from google.oauth2.credentials import Credentials
+    import logging
 
     random.seed() # Seed the RNG.
     load_dotenv()
@@ -27,6 +28,13 @@ def main():
     RANGE_NAME = os.getenv("RANGE_NAME")
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
     ANNOUNCEMENT_CHANNEL = os.getenv("ANNOUNCEMENT_CHANNEL")
+
+
+    # Logging formating to view time stamps and level of log information
+    logging.basicConfig(
+         format='%(asctime)s %(levelname)-8s %(message)s',
+         level=logging.INFO,
+         datefmt='%Y-%m-%d %H:%M:%S')
 
     # Establish a connection to the Google Sheets API.
     # The file token.json stores the user's access and refresh tokens, and is created automatically when the authorization flow completes for the first time.
@@ -54,15 +62,14 @@ def main():
     # Print the bot information upon bootup.
     @bot.event
     async def on_ready():
-        print('Logged in as')
-        print(bot.user.name)
-        print(bot.user.id)
+        logging.info('Logged in as\n' + bot.user.name)
+        logging.DEBUG(bot.user.id)
         print('------')
      
     # Print that the bot is connected to the server.
     @bot.event
     async def on_connect():
-        print("--Connected to server--")
+        logging.info("--Connected to server--")
 
     # Declare the FetchDate class, inheriting methods from Cog.
     class FetchDate(commands.Cog):
@@ -75,10 +82,10 @@ def main():
 
         # Declare the fetch_due_dates loop. Loop will run every 24 hours.
         @tasks.loop(minutes=30.0)
-        async def fetch_due_dates(self):
-            if (datetime.now().hour != 6):
+        async def fetch_due_dates(self, channelID=None):
+            if (datetime.now().hour != 6 and channelID == None):
                 return
-            print("Fetching due dates...")
+            logging.info("Fetching due dates...")
 
             # Use Google Sheets API to fetch due dates.
             sheet = service.spreadsheets()
@@ -87,7 +94,7 @@ def main():
 
             # If no data was received, do not force any messages to be sent. 
             if not values:
-                print('No data found.')
+                logging.warning('No data found.')
 
             # Otherwise, send a message to @everyone about what assignments are due within a week.
             else:
@@ -137,25 +144,32 @@ def main():
                         pass
             
             # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
-            await announce_due_dates(assignments)
+            await announce_due_dates(assignments, channelID)
 
         @fetch_due_dates.before_loop
         async def before_fetch(self):
-            print("Initiating data fetching.")
+            logging.debug("Initiating data fetching.")
 
     # Declare a function to send an announcement to a hard-coded channel number in .env.
     @bot.event
-    async def announce_due_dates(due_date_dictionary):
+    async def announce_due_dates(due_date_dictionary, channelID=None):
         # Preface with @everyone header.
         message = "@everyone\n*Due Dates For Today!*\n\n"
 
         await bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
         
-        # If ANNOUNCEMENT_CHANNEL is in .env, send to the channel ID. Otherwise, send to a channel called #announcements.
-        if ANNOUNCEMENT_CHANNEL != None:
-            channel = bot.get_channel(int(ANNOUNCEMENT_CHANNEL))
-        else:
+        # Checks if a channelID has been passed as an argument, then checks .env ANNOUNCEMENT_CHANNEL, then checks for announcements channel, otherwises returns error.
+        if bot.get_channel(channelID) != None:
+            # If a channel ID is provided that means the function was called on demand, meaning @everyone should be avoided.
+            message = "*Due Dates For Today!*\n\n"
+            channel = bot.get_channel(channelID)
+        elif bot.get_channel(ANNOUNCEMENT_CHANNEL) != None:
+            channel = bot.get_channel(ANNOUNCEMENT_CHANNEL)
+        elif discord.utils.get(bot.get_all_channels(), name="announcements") != None:
             channel = discord.utils.get(bot.get_all_channels(), name="announcements")
+        else:
+            logging.error("Unable to find channel to send announcement to.")
+            return
 
         # For every course in the due date dictionary...
         for course in due_date_dictionary.keys():
@@ -204,6 +218,16 @@ def main():
                 # TODO: Allow for the ability to modify channel for announcement.
                 channel = discord.utils.get(ctx.guild.channels, name=arg)
                 await channel.send('This is the new announcement channel.')
+
+
+
+
+
+    # Command to to fetch due dates on demand
+    @bot.command(pass_context=True)
+    async def homework(ctx):
+        await fetcher.fetch_due_dates(channelID=ctx.channel.id)
+    
 
     # Print the message back.
     @bot.command()
