@@ -62,9 +62,9 @@ Create your bot, give it a name, and click `Click to Reveal Token` to see your b
 Do not share this token with anyone or the public (think of it as an RSA private key). If it does get leaked, you can always regenerate a new token from the same menu. 
 
 ### Token Association
-Create a file called `secrets.env` in the src folder and assign the token as a String to a constant called `DISCORD_TOKEN`.
+Create a file called `.env` in the src folder and assign the token as a String to a constant called `DISCORD_TOKEN`.
 
-When you commit and push changes to your fork, do not add `secrets.env`. Although `.gitignore` does this for you, do not forcibly add it anyways.
+When you commit and push changes to your fork, do not add `.env`. Although `.gitignore` does this for you, do not forcibly add it anyways.
 
 
 ## List of Ways You Can Contribute

@@ -13,7 +13,7 @@ This project uses the [discord.py](https://github.com/Rapptz/discord.py) API wra
 
 You can run your own version of the bot from a repl.it project or from your local machine. Create the Discord Bot Account through your [Applications page](https://discord.com/developers/applications), create an OAuth2 URL (check off bot and desired permissions), and then use the generated URL to invite the bot to your test server.
 
-You will also need the bot token, which can be generated from the Build-A-Bot menu under Bot. Create a file called `secrets.py` in the src folder and store the token as a String constant called `DISCORD_TOKEN`. When making commits, do not add this file.
+You will also need the bot token, which can be generated from the Build-A-Bot menu under Bot. Create a file called `.env` in the src folder and store the token as a String constant called `DISCORD_TOKEN`. When making commits, do not add this file.
 
 ### Dependencies
 Discord-Bot uses several Python modules bundled with discord.py. You can choose to install all the required dependencies at once using `pip3 install -r requirements.txt`.
