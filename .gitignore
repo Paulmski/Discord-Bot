@@ -128,6 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-
 # Sensitive information
 secrets.py
+*.json
