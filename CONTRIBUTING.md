@@ -66,6 +66,7 @@ Create a file called `secrets.env` in the src folder and assign the token as a S
 
 When you commit and push changes to your fork, do not add `secrets.env`. Although `.gitignore` does this for you, do not forcibly add it anyways.
 
+
 ## List of Ways You Can Contribute
 ___
 ### Feature Requests or Bug Reports
