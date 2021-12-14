@@ -10,7 +10,7 @@ def main():
     import os
     from dotenv import load_dotenv
     from datetime import datetime
-    
+
     from googleapiclient.discovery import build
     from google_auth_oauthlib.flow import InstalledAppFlow
     from google.auth.transport.requests import Request
@@ -62,10 +62,10 @@ def main():
     # Print the bot information upon bootup.
     @bot.event
     async def on_ready():
-        logging.info('Logged in as\n' + bot.user.name)
-        logging.DEBUG(bot.user.id)
+        logging.info('\nLogged in as\n' + bot.user.name)
+        logging.debug(bot.user.id)
         print('------')
-     
+
     # Print that the bot is connected to the server.
     @bot.event
     async def on_connect():
@@ -92,7 +92,7 @@ def main():
             result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
             values = result.get('values', [])
 
-            # If no data was received, do not force any messages to be sent. 
+            # If no data was received, do not force any messages to be sent.
             if not values:
                 logging.warning('No data found.')
 
@@ -138,11 +138,11 @@ def main():
                             if course not in assignments.keys():
                                 assignments[course] = []
                             assignments[course].append([assignment, due_date, days_left, notes])
-                    
+
                     # Otherwise, pass.
                     except IndexError:
                         pass
-            
+
             # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
             await announce_due_dates(assignments, channelID)
 
@@ -157,14 +157,14 @@ def main():
         message = "@everyone\n*Due Dates For Today!*\n\n"
 
         await bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
-        
+
         # Checks if a channelID has been passed as an argument, then checks .env ANNOUNCEMENT_CHANNEL, then checks for announcements channel, otherwises returns error.
         if bot.get_channel(channelID) != None:
             # If a channel ID is provided that means the function was called on demand, meaning @everyone should be avoided.
             message = "*Due Dates For Today!*\n\n"
             channel = bot.get_channel(channelID)
-        elif bot.get_channel(ANNOUNCEMENT_CHANNEL) != None:
-            channel = bot.get_channel(ANNOUNCEMENT_CHANNEL)
+        elif bot.get_channel(int(ANNOUNCEMENT_CHANNEL)) != None:
+            channel = bot.get_channel(int(ANNOUNCEMENT_CHANNEL))
         elif discord.utils.get(bot.get_all_channels(), name="announcements") != None:
             channel = discord.utils.get(bot.get_all_channels(), name="announcements")
         else:
@@ -187,7 +187,7 @@ def main():
                     message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n\n"
                 else:
                     message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n__Notes:__\n{notes}\n\n"
-        
+
         # Send the message to the announcements channel.
         await channel.send(message)
 
@@ -196,7 +196,7 @@ def main():
     async def coinflip(ctx):
         '''
         According to Teare and Murray's "Probability of a tossed coin landing on edge", extrapolations from a physical simulation model suggests "that the probability of an American nickel landing on edge is approximately 1 in 6000 tosses."
-        Murray, Daniel B., and Scott W. Teare. “Probability of a Tossed Coin Landing on Edge.” Physical Review E, vol. 48, no. 4, 1993, pp. 2547–2552., https://doi.org/10.1103/physreve.48.2547. 
+        Murray, Daniel B., and Scott W. Teare. “Probability of a Tossed Coin Landing on Edge.” Physical Review E, vol. 48, no. 4, 1993, pp. 2547–2552., https://doi.org/10.1103/physreve.48.2547.
         '''
         rand = random.randint(0, 6000)
         if rand == 777:
@@ -227,7 +227,7 @@ def main():
     @bot.command(pass_context=True)
     async def homework(ctx):
         await fetcher.fetch_due_dates(channelID=ctx.channel.id)
-    
+
 
     # Print the message back.
     @bot.command()
@@ -244,4 +244,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-  
