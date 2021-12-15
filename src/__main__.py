@@ -226,8 +226,6 @@ def main():
     fetcher = FetchDate()
 
     # Run the bot using the DISCORD_TOKEN constant from .env.
-    # For developers running their own version of the bot, create a file called .env in the src directory, and assign the bot's token as a String to a constant called DISCORD_TOKEN.
-    # Remember not to add the .env file when committing/pushing.
     bot.run(DISCORD_TOKEN)
 
 if __name__ == '__main__':
