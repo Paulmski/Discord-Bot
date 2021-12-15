@@ -6,7 +6,6 @@ def main():
     from discord.ext import tasks, commands
     import discord.utils
     import random
-    import secrets
     import os
     from dotenv import load_dotenv
     import gsapi_builder;
