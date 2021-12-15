@@ -49,7 +49,10 @@ Once you have done that, make sure to create a OAuth2 URL to invite your bot to 
 
 Go to OAuth2 > URL Generator and select `bot` as the scope. You should then give the bot the appropriate server permissions. The URL to invite your bot a server _you_ own will be at the bottom of the page.
 
-### Token Generation
+### Setting Up `.env` Fully
+In order for the bot to actually work, you need to fill in a file called `.env` in your `src` folder, something that isn't done automatically.
+
+#### Token Generation
 You will also need the bot `TOKEN` to run the bot on your local machine/repl.it.
 
 This can be generated from Build-A-Bot under the Bot menu.
@@ -57,11 +60,67 @@ Create your bot, give it a name, and click `Click to Reveal Token` to see your b
 
 Do not share this token with anyone or the public (think of it as an RSA private key). If it does get leaked, you can always regenerate a new token from the same menu. 
 
-### Token Association
-Create a file called `.env` in the src folder and assign the token as a String to a constant called `DISCORD_TOKEN`.
-
+#### Token Association
+Create a file called `.env` in the src folder and assign the token as a String to a constant called `DISCORD_TOKEN`. Example:
+```python
+DISCORD_TOKEN = "v3RyR3A!diSCorDt0k3n1d"
+```
 When you commit and push changes to your fork, do not add `.env`. Although `.gitignore` does this for you, do not forcibly add it anyways.
 
+#### Linking the Spreadsheet
+Find the spreadsheet's ID (before the `/view#gid=0` parameter in the URL), and assign it as a String to a constant called `SPREADSHEET_ID` in `.env`.
+
+You will also need to specify the `RANGE_NAME`. In Google Sheets, several spreadsheets are split into "books", the names of which can be seen along the bottom.
+
+Specify the current semester's book followed by the range of cells in which the Course Name, Due Date, Assignment Name, Days Remaining, and Notes are. 
+
+Full Example:
+```python
+SPREADSHEET_ID = "t0t@llyr3@lspr3@dsh33t!d"
+RANGE_NAME = "Winter Semester!F1:J"
+```
+
+#### Linking an Announcements Channel
+You should also link the `#announcements` channel in the `.env` so the bot knows where to post daily.
+
+The announcement ID can be found at the end of a Discord URL, or its ID can be copied from the channel name if you have Developer Mode turned on.
+
+Example:
+
+```python
+ANNOUNCEMENTS_CHANNEL = "123456789123456789"
+```
+
+#### `.env` Full Example
+Once you filled all your `.env` variables, your file should look like this:
+
+```python
+DISCORD_TOKEN = "v3RyR3A!diSCorDt0k3n1d"
+SPREADSHEET_ID = "t0t@llyr3@lspr3@dsh33t!d"
+RANGE_NAME = "Winter Semester!F1:J"
+ANNOUNCEMENTS_CHANNEL = "123456789123456789"
+```
+
+### Making Contact With The Google Sheets API
+Now, you need to set up an email account and enable the Google Sheets API through Google Cloud Platform.
+
+#### Step 1: Sign Up
+Sign up for an account through [Google Cloud](https://cloud.google.com/) and then navigate to [the Google Cloud Console](https://console.cloud.google.com/).
+
+#### Step 2: Create a New Project
+Create a new project from the top navigation bar's "Select a project", and give your project any name you like. Now, your project name should be displayed in the spot you clicked "Select a project".
+
+#### Step 3: Creating an OAuth2 Client ID
+Navigate from Hamburger Menu > APIs & Services > Credentials > Create Credentials > OAuth Client ID.
+
+Set the application type to `Desktop app` and give it any name.
+
+Now, from the Hamburger Menu, go to `Marketplace` and look up `Google Sheets API`. Enable the API on your account then go back to the `APIs & Services` section as before.
+
+Finally, you can download the OAuth2 Client ID. Download the file to the root directory Discord-Bot, and make sure you name it `credentials.json` !
+
+#### Step 4: Run the bot!
+The bot now has everything it needs to run. Run it from your local machine or a repl.it project and test it on a server you own.
 
 ## List of Ways You Can Contribute
 ### Feature Requests or Bug Reports
