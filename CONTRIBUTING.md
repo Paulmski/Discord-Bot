@@ -6,7 +6,6 @@ Thank you for your interest in contributing to the Lakehead CS 2021 Guild's Disc
 We wish to see your contribution to this project, no matter your skill level! This document will help walk you through getting started, the rules for this repo, setting up the Discord bot on your own server, and how you can contribute from here on out.
 
 ## Table of Contents
-___
 [Getting Started](#Getting-Started)
 
 [Rules](#Rules)
@@ -17,7 +16,6 @@ ___
 
 
 ## Getting Started
-___
 If you haven't already, install [Git and Git Bash](https://git-scm.com/downloads), a code editor like [Visual Studio Code](https://code.visualstudio.com/), and [Git Tower](https://git-tower.com) onto your local machine.
 
 Before getting started with Git, it's best to read up and learn the basic commands, workflow, conventions, and etiquette. These resources are great for starting off:
@@ -30,7 +28,6 @@ Before getting started with Git, it's best to read up and learn the basic comman
 Assuming you already know Python, you should also refer to the [discord.py documentation](https://discordpy.readthedocs.io/en/stable/ext/commands/) when debugging, refactoring, or programming.
 
 ## Rules
-___
 For this project, we are looking to uphold Git etiquette and good workflow.
 
 1. Whenever you want to make changes to the project, please fork the project.
@@ -42,7 +39,6 @@ For this project, we are looking to uphold Git etiquette and good workflow.
 Sometimes pull requests will be denied or revised. This is only the nature of the project; changes and optimizations need to be made before it can be incorporated into the main branch.
 
 ## Testing the Bot
-___
 You can run your own version of the bot from a repl.it project or from your local machine.
 
 ### Creating a Bot Account
@@ -68,7 +64,6 @@ When you commit and push changes to your fork, do not add `.env`. Although `.git
 
 
 ## List of Ways You Can Contribute
-___
 ### Feature Requests or Bug Reports
 Do you have an idea for a feature the Discord bot could use? See a bug that needs squashing? Go ahead and add it to the [Issues browser](https://github.com/Paulmski/Discord-Bot/issues).
 
