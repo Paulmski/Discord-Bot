@@ -82,7 +82,7 @@ def main():
             self.fetch_due_dates.cancel()
 
         # Declare the fetch_due_dates loop. Loop will run every 24 hours.
-        @tasks.loop(minutes=30.0)
+        @tasks.loop(minutes=60.0)
         async def fetch_due_dates(self, channelID=None):
             if (datetime.now().hour != 6 and channelID == None):
                 return
