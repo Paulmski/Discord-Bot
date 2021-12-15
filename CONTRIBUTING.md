@@ -6,14 +6,14 @@ Thank you for your interest in contributing to the Lakehead CS 2021 Guild's Disc
 We wish to see your contribution to this project, no matter your skill level! This document will help walk you through getting started, the rules for this repo, setting up the Discord bot on your own server, and how you can contribute from here on out.
 
 ## Table of Contents
-[Getting Started](#Getting-Started)
-
-[Rules](#Rules)
-
-[Testing the Bot](#Testing-the-Bot)
-
-[Methods of Contribution](#List-of-Ways-You-Can-Contribute)
-
+* [Getting Started](#Getting-Started)
+* [Rules](#Rules)
+* [Testing the Bot](#Testing-the-Bot)
+    * [Creating a Bot account](#Creating-A-Bot-Account)
+    * [Letting the bot into your test server](#Letting-the-Bot-Into-Your-Test-Server)
+    * [Setting up `.env`](#Setting-Up-`.env`-Fully)
+    * [Setting up Google Sheets API](#Making-Contact-With-The-Google-Sheets-API)
+* [List of Ways You Can Contribute](#List-of-Ways-You-Can-Contribute)
 
 ## Getting Started
 If you haven't already, install [Git and Git Bash](https://git-scm.com/downloads), a code editor like [Visual Studio Code](https://code.visualstudio.com/), and [Git Tower](https://git-tower.com) onto your local machine.
@@ -61,7 +61,7 @@ Create your bot, give it a name, and click `Click to Reveal Token` to see your b
 Do not share this token with anyone or the public (think of it as an RSA private key). If it does get leaked, you can always regenerate a new token from the same menu. 
 
 #### Token Association
-Create a file called `.env` in the src folder and assign the token as a String to a constant called `DISCORD_TOKEN`. Example:
+Assign the token as a String to a constant called `DISCORD_TOKEN`. Example:
 ```python
 DISCORD_TOKEN = "v3RyR3A!diSCorDt0k3n1d"
 ```
@@ -74,7 +74,7 @@ You will also need to specify the `RANGE_NAME`. In Google Sheets, several spread
 
 Specify the current semester's book followed by the range of cells in which the Course Name, Due Date, Assignment Name, Days Remaining, and Notes are. 
 
-Full Example:
+Example:
 ```python
 SPREADSHEET_ID = "t0t@llyr3@lspr3@dsh33t!d"
 RANGE_NAME = "Winter Semester!F1:J"
