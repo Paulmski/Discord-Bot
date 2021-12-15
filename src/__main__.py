@@ -128,14 +128,17 @@ def main():
     @bot.event
     async def announce_due_dates(due_date_dictionary, channel_id=None):
         # Preface with @everyone header.
-        message = "@everyone\n*Due Dates For Today!*\n\n"
+        message = "@everyone"
+
+        # Instantiate the Embed.
+        embedded_message = discord.Embed(title="Due Dates For Today", colour=discord.Colour.from_rgb(160, 165, 25))
 
         await bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
 
         # Checks if a channel_id has been passed as an argument, then checks .env ANNOUNCEMENT_CHANNEL, then checks for announcements channel, otherwises returns error.
         if bot.get_channel(channel_id) != None:
             # If a channel ID is provided that means the function was called on demand, meaning @everyone should be avoided.
-            message = "*Due Dates For Today!*\n\n"
+            message = ""
             channel = bot.get_channel(channel_id)
         elif bot.get_channel(int(ANNOUNCEMENT_CHANNEL)) != None:
             channel = bot.get_channel(int(ANNOUNCEMENT_CHANNEL))
@@ -147,23 +150,38 @@ def main():
 
         # For every course in the due date dictionary...
         for course in due_date_dictionary.keys():
-            message += f"> {course}\n\n"
+            course_assignments = ""
             for assignment in due_date_dictionary[course]:
 
                 # Parse the information from the assignment list.
                 name = assignment[0]
                 due_date = assignment[1]
-                days_left = assignment[2]
+                days_left = int(assignment[2])
+
+                # Change days_left to a different code block color depending on days left.
+                if days_left > 3:
+                    days_left = f"```diff\n+ {days_left} days remaining.```"
+                elif days_left > 0:
+                    days_left = f"```fix\n- {days_left} days remaining.```"
+                else:
+                    days_left = f"```diff\n- {days_left} days remaining.```"
+
                 notes = assignment[3]
 
-                # Append the information to the final message.
+                # Append the information to the course_assignments.
                 if notes == "":
-                    message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n\n"
+                    course_assignments += f"\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}\n\n"
                 else:
-                    message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n__Notes:__\n{notes}\n\n"
+                    course_assignments += f"\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}__Notes:__\n{notes}\n"
+            
+            # Add an extra embed field for the every course.
+            embedded_message.add_field(name=f"__{course}__", value=course_assignments + "", inline=False)
 
+        # Add project information to bottom.
+        embedded_message.add_field(name="", value="\nI am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
+        
         # Send the message to the announcements channel.
-        await channel.send(message)
+        await channel.send(message, embed=embedded_message)
 
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
