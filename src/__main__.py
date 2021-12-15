@@ -9,19 +9,12 @@ def main():
     import secrets
     import os
     from dotenv import load_dotenv
+    import gsapi_builder;
     from datetime import datetime
-    from googleapiclient.discovery import build
-    from google_auth_oauthlib.flow import InstalledAppFlow
-    from google.auth.transport.requests import Request
-    from google.oauth2.credentials import Credentials
     import logging
-
 
     random.seed() # Seed the RNG.
     load_dotenv()
-
-    # Enforcing read only scope for Google Sheets API.
-    SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
     # Getting environment variables.
     SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
@@ -29,33 +22,14 @@ def main():
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
     ANNOUNCEMENT_CHANNEL = os.getenv("ANNOUNCEMENT_CHANNEL")
 
-
     # Logging formating to view time stamps and level of log information
     logging.basicConfig(
          format='%(asctime)s %(levelname)-8s %(message)s',
          level=logging.INFO,
          datefmt='%Y-%m-%d %H:%M:%S')
 
-
-    # Establish a connection to the Google Sheets API.
-    # The file token.json stores the user's access and refresh tokens, and is created automatically when the authorization flow completes for the first time.
-    creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-
-    # If token.json does not exist, log in manually.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials in token.json for the next run.
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
-
     # Build the Google Sheets API service.
-    service = build('sheets', 'v4', credentials=creds)
+    service = gsapi_builder.build_service()
 
     # Instantiate the bot, with the ! prefix preferred.
     bot = Bot(command_prefix='!')
@@ -83,8 +57,8 @@ def main():
 
         # Declare the fetch_due_dates loop. Loop will run every 24 hours.
         @tasks.loop(minutes=30.0)
-        async def fetch_due_dates(self, channelID=None):
-            if (datetime.now().hour != 6 and channelID == None):
+        async def fetch_due_dates(self, channel_id=None):
+            if (datetime.now().hour != 6 and channel_id == None):
                 return
             logging.info("Fetching due dates...")
 
@@ -145,7 +119,7 @@ def main():
                         pass
 
             # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
-            await announce_due_dates(assignments, channelID)
+            await announce_due_dates(assignments, channel_id=channel_id)
 
         @fetch_due_dates.before_loop
         async def before_fetch(self):
@@ -153,17 +127,17 @@ def main():
 
     # Declare a function to send an announcement to a hard-coded channel number in .env.
     @bot.event
-    async def announce_due_dates(due_date_dictionary, channelID=None):
+    async def announce_due_dates(due_date_dictionary, channel_id=None):
         # Preface with @everyone header.
         message = "@everyone\n*Due Dates For Today!*\n\n"
 
         await bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
 
-        # Checks if a channelID has been passed as an argument, then checks .env ANNOUNCEMENT_CHANNEL, then checks for announcements channel, otherwises returns error.
-        if bot.get_channel(channelID) != None:
+        # Checks if a channel_id has been passed as an argument, then checks .env ANNOUNCEMENT_CHANNEL, then checks for announcements channel, otherwises returns error.
+        if bot.get_channel(channel_id) != None:
             # If a channel ID is provided that means the function was called on demand, meaning @everyone should be avoided.
             message = "*Due Dates For Today!*\n\n"
-            channel = bot.get_channel(channelID)
+            channel = bot.get_channel(channel_id)
         elif bot.get_channel(int(ANNOUNCEMENT_CHANNEL)) != None:
             channel = bot.get_channel(int(ANNOUNCEMENT_CHANNEL))
         elif discord.utils.get(bot.get_all_channels(), name="announcements") != None:
@@ -189,119 +163,6 @@ def main():
                 else:
                     message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n__Notes:__\n{notes}\n\n"
 
-        # Send the message to the announcements channel.
-        await channel.send(message)
-
-    # Declare the FetchDate class, inheriting methods from Cog.
-    class FetchDate(commands.Cog):
-        def __init__(self):
-            self.fetch_due_dates.start()
-
-        # Declare a function to unload the fetch_due_date cog.
-        def cog_unload(self):
-            self.fetch_due_dates.cancel()
-
-        # Declare the fetch_due_dates loop. Loop will run every 24 hours.
-        @tasks.loop(minutes=30.0)
-        async def fetch_due_dates(self):
-            if (datetime.now().hour != 6):
-                return
-            print("Fetching due dates...")
-
-            # Use Google Sheets API to fetch due dates.
-            sheet = service.spreadsheets()
-            result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
-            values = result.get('values', [])
-
-            # If no data was received, do not force any messages to be sent. 
-            if not values:
-                print('No data found.')
-
-            # Otherwise, send a message to @everyone about what assignments are due within a week.
-            else:
-
-                header = values[0] # Header row with column names (A1:E1)
-
-                # Grab the indexes of the headers from A1:E1.
-                index = {
-                    'Course Name': header.index('Course Name'),
-                    'Assignment Name': header.index('Assignment Name'),
-                    'Due Date': header.index('Due Date'),
-                    'Days Until Due Date': header.index('Days Until Due Date'),
-                    'Notes': header.index('Notes')
-                }
-
-                # Declare assignments dictionary, will become an argument for announce_due_dates().
-                assignments = {}
-
-                for row in values[1:]:
-                    # Should there be no IndexError raised...
-                    try:
-                        # If the class name has changed from the A column, change the current_class variable.
-                        if row[index['Course Name']] != '':
-                            course = row[index['Course Name']]
-
-                        # Assign the assignment name, due date, and days until due date.
-                        assignment = row[index['Assignment Name']]
-                        due_date = row[index['Due Date']]
-                        days_left = row[index['Days Until Due Date']]
-
-                        # If there are notes in this row, assign the value to notes.
-                        if len(row) == 5:
-                            notes = row[index['Notes']]
-
-                        # Otherwise, just assign it as a blank value.
-                        else:
-                            notes = ""
-
-                        # If the assignment is due in a week, add it to the final message to @everyone.
-                        if int(days_left) >= 0 and int(days_left) <= 7:
-                            if course not in assignments.keys():
-                                assignments[course] = []
-                            assignments[course].append([assignment, due_date, days_left, notes])
-                    
-                    # Otherwise, pass.
-                    except IndexError:
-                        pass
-            
-            # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
-            await announce_due_dates(assignments)
-
-        @fetch_due_dates.before_loop
-        async def before_fetch(self):
-            print("Initiating data fetching.")
-
-    # Declare a function to send an announcement to a hard-coded channel number in .env.
-    @bot.event
-    async def announce_due_dates(due_date_dictionary):
-        # Preface with @everyone header.
-        message = "@everyone\n*Due Dates For Today!*\n\n"
-
-        await bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
-        
-        # If ANNOUNCEMENT_CHANNEL is in .env, send to the channel ID. Otherwise, send to a channel called #announcements.
-        if ANNOUNCEMENT_CHANNEL != None:
-            channel = bot.get_channel(int(ANNOUNCEMENT_CHANNEL))
-        else:
-            channel = discord.utils.get(bot.get_all_channels(), name="announcements")
-
-        # For every course in the due date dictionary...
-        for course in due_date_dictionary.keys():
-            message += f"> {course}\n\n"
-            for assignment in due_date_dictionary[course]:
-
-                # Parse the information from the assignment list.
-                name = assignment[0]
-                due_date = assignment[1]
-                days_left = assignment[2]
-                notes = assignment[3]
-
-                # Append the information to the final message.
-                if notes == "":
-                    message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n\n"
-                else:
-                    message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n__Notes:__\n{notes}\n\n"
-        
         # Send the message to the announcements channel.
         await channel.send(message)
 
@@ -333,14 +194,10 @@ def main():
                 channel = discord.utils.get(ctx.guild.channels, name=arg)
                 await channel.send('This is the new announcement channel.')
 
-
-
-
-
-    # Command to to fetch due dates on demand
+    # Command to to fetch due dates on demand.
     @bot.command(pass_context=True)
     async def homework(ctx):
-        await fetcher.fetch_due_dates(channelID=ctx.channel.id)
+        await fetcher.fetch_due_dates(channel_id=ctx.channel.id)
 
 
     # Print the message back.
