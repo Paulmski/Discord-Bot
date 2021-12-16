@@ -6,22 +6,14 @@ def main():
     from discord.ext import tasks, commands
     import discord.utils
     import random
-    import secrets
     import os
     from dotenv import load_dotenv
+    import gsapi_builder;
     from datetime import datetime
-    from googleapiclient.discovery import build
-    from google_auth_oauthlib.flow import InstalledAppFlow
-    from google.auth.transport.requests import Request
-    from google.oauth2.credentials import Credentials
     import logging
-
 
     random.seed() # Seed the RNG.
     load_dotenv()
-
-    # Enforcing read only scope for Google Sheets API.
-    SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
     # Getting environment variables.
     SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
@@ -29,33 +21,14 @@ def main():
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
     ANNOUNCEMENT_CHANNEL = os.getenv("ANNOUNCEMENT_CHANNEL")
 
-
     # Logging formating to view time stamps and level of log information
     logging.basicConfig(
          format='%(asctime)s %(levelname)-8s %(message)s',
          level=logging.INFO,
          datefmt='%Y-%m-%d %H:%M:%S')
 
-
-    # Establish a connection to the Google Sheets API.
-    # The file token.json stores the user's access and refresh tokens, and is created automatically when the authorization flow completes for the first time.
-    creds = None
-    if os.path.exists('token.json'):
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-
-    # If token.json does not exist, log in manually.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials in token.json for the next run.
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
-
     # Build the Google Sheets API service.
-    service = build('sheets', 'v4', credentials=creds)
+    service = gsapi_builder.build_service()
 
     # Instantiate the bot, with the ! prefix preferred.
     bot = Bot(command_prefix='!')
@@ -83,8 +56,8 @@ def main():
 
         # Declare the fetch_due_dates loop. Loop will run every 24 hours.
         @tasks.loop(minutes=60.0)
-        async def fetch_due_dates(self, channelID=None):
-            if (datetime.now().hour != 6 and channelID == None):
+        async def fetch_due_dates(self, channel_id=None):
+            if (datetime.now().hour != 6 and channel_id == None):
                 return
             logging.info("Fetching due dates...")
 
@@ -145,7 +118,7 @@ def main():
                         pass
 
             # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
-            await announce_due_dates(assignments, channelID)
+            await announce_due_dates(assignments, channel_id=channel_id)
 
         @fetch_due_dates.before_loop
         async def before_fetch(self):
@@ -153,17 +126,20 @@ def main():
 
     # Declare a function to send an announcement to a hard-coded channel number in .env.
     @bot.event
-    async def announce_due_dates(due_date_dictionary, channelID=None):
+    async def announce_due_dates(due_date_dictionary, channel_id=None):
         # Preface with @everyone header.
-        message = "@everyone\n*Due Dates For Today!*\n\n"
+        message = "@everyone"
+
+        # Instantiate the Embed.
+        embedded_message = discord.Embed(title="Due Dates For Today", colour=discord.Colour.from_rgb(160, 165, 25))
 
         await bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
 
-        # Checks if a channelID has been passed as an argument, then checks .env ANNOUNCEMENT_CHANNEL, then checks for announcements channel, otherwises returns error.
-        if bot.get_channel(channelID) != None:
+        # Checks if a channel_id has been passed as an argument, then checks .env ANNOUNCEMENT_CHANNEL, then checks for announcements channel, otherwises returns error.
+        if bot.get_channel(channel_id) != None:
             # If a channel ID is provided that means the function was called on demand, meaning @everyone should be avoided.
-            message = "*Due Dates For Today!*\n\n"
-            channel = bot.get_channel(channelID)
+            message = ""
+            channel = bot.get_channel(channel_id)
         elif bot.get_channel(int(ANNOUNCEMENT_CHANNEL)) != None:
             channel = bot.get_channel(int(ANNOUNCEMENT_CHANNEL))
         elif discord.utils.get(bot.get_all_channels(), name="announcements") != None:
@@ -174,58 +150,38 @@ def main():
 
         # For every course in the due date dictionary...
         for course in due_date_dictionary.keys():
-            message += f"> {course}\n\n"
+            course_assignments = ""
             for assignment in due_date_dictionary[course]:
 
                 # Parse the information from the assignment list.
                 name = assignment[0]
                 due_date = assignment[1]
-                days_left = assignment[2]
+                days_left = int(assignment[2])
+
+                # Change days_left to a different code block color depending on days left.
+                if days_left > 3:
+                    days_left = f"```diff\n+ {days_left} days remaining.```"
+                elif days_left > 0:
+                    days_left = f"```fix\n- {days_left} days remaining.```"
+                else:
+                    days_left = f"```diff\n- {days_left} days remaining.```"
+
                 notes = assignment[3]
 
-                # Append the information to the final message.
+                # Append the information to the course_assignments.
                 if notes == "":
-                    message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n\n"
+                    course_assignments += f"\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}\n\n"
                 else:
-                    message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n__Notes:__\n{notes}\n\n"
+                    course_assignments += f"\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}__Notes:__\n{notes}\n"
+            
+            # Add an extra embed field for the every course.
+            embedded_message.add_field(name=f"__{course}__", value=course_assignments + "", inline=False)
 
-        # Send the message to the announcements channel.
-        await channel.send(message)
-
-
-    # Declare a function to send an announcement to a hard-coded channel number in .env.
-    @bot.event
-    async def announce_due_dates(due_date_dictionary):
-        # Preface with @everyone header.
-        message = "@everyone\n*Due Dates For Today!*\n\n"
-
-        await bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
-        
-        # If ANNOUNCEMENT_CHANNEL is in .env, send to the channel ID. Otherwise, send to a channel called #announcements.
-        if ANNOUNCEMENT_CHANNEL != None:
-            channel = bot.get_channel(int(ANNOUNCEMENT_CHANNEL))
-        else:
-            channel = discord.utils.get(bot.get_all_channels(), name="announcements")
-
-        # For every course in the due date dictionary...
-        for course in due_date_dictionary.keys():
-            message += f"> {course}\n\n"
-            for assignment in due_date_dictionary[course]:
-
-                # Parse the information from the assignment list.
-                name = assignment[0]
-                due_date = assignment[1]
-                days_left = assignment[2]
-                notes = assignment[3]
-
-                # Append the information to the final message.
-                if notes == "":
-                    message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n\n"
-                else:
-                    message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n__Notes:__\n{notes}\n\n"
+        # Add project information to bottom.
+        embedded_message.add_field(name="", value="\nI am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
         
         # Send the message to the announcements channel.
-        await channel.send(message, delete_after=86400.0)
+        await channel.send(message, embed=embedded_message, delete_after=86400.0)
 
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
@@ -255,14 +211,10 @@ def main():
                 channel = discord.utils.get(ctx.guild.channels, name=arg)
                 await channel.send('This is the new announcement channel.')
 
-
-
-
-
-    # Command to to fetch due dates on demand
+    # Command to to fetch due dates on demand.
     @bot.command(pass_context=True)
     async def homework(ctx):
-        await fetcher.fetch_due_dates(channelID=ctx.channel.id)
+        await fetcher.fetch_due_dates(channel_id=ctx.channel.id)
 
 
     # Print the message back.
@@ -274,8 +226,6 @@ def main():
     fetcher = FetchDate()
 
     # Run the bot using the DISCORD_TOKEN constant from .env.
-    # For developers running their own version of the bot, create a file called .env in the src directory, and assign the bot's token as a String to a constant called DISCORD_TOKEN.
-    # Remember not to add the .env file when committing/pushing.
     bot.run(DISCORD_TOKEN)
 
 if __name__ == '__main__':
