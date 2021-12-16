@@ -55,7 +55,7 @@ def main():
             self.fetch_due_dates.cancel()
 
         # Declare the fetch_due_dates loop. Loop will run every 24 hours.
-        @tasks.loop(minutes=30.0)
+        @tasks.loop(minutes=60.0)
         async def fetch_due_dates(self, channel_id=None):
             if (datetime.now().hour != 6 and channel_id == None):
                 return
@@ -181,7 +181,7 @@ def main():
         embedded_message.add_field(name="", value="\nI am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
         
         # Send the message to the announcements channel.
-        await channel.send(message, embed=embedded_message)
+        await channel.send(message, embed=embedded_message, delete_after=86400.0)
 
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
