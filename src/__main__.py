@@ -225,7 +225,7 @@ def main():
                     message += f"**{name}**\nDue on {due_date}, {datetime.now().year}.\n_{days_left} days remaining._\n__Notes:__\n{notes}\n\n"
         
         # Send the message to the announcements channel.
-        await channel.send(message)
+        await channel.send(message, delete_after=86400.0)
 
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
