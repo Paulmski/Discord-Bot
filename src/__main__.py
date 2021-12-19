@@ -45,6 +45,20 @@ def main():
     async def on_connect():
         logging.info("--Connected to server--")
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     # Declare the FetchDate class, inheriting methods from Cog.
     class FetchDate(commands.Cog):
         def __init__(self):
@@ -117,8 +131,10 @@ def main():
                     except IndexError:
                         pass
 
-            # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
-            await announce_due_dates(assignments, channel_id=channel_id)
+
+            if len(assignments) != 0:
+                # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
+                await announce_due_dates(assignments, channel_id=channel_id)
 
         @fetch_due_dates.before_loop
         async def before_fetch(self):
