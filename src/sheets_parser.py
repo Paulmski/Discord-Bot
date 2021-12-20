@@ -1,14 +1,16 @@
 # file app/sheets_parser.py
 
 import logging
+from time import strftime
 from discord.http import Route
+from datetime import datetime
 
 # Returns a dictionary containing assignment information.
 def fetch_due_dates(service, SPREADSHEET_ID=None, RANGE_NAME=None):
 
     if (SPREADSHEET_ID == None or RANGE_NAME == None):
         logging.warning("SPREADSHEET_ID or RANGE_NAME not defined in .env")
-        return {}
+        return None
 
     # Use Google Sheets API to fetch due dates.
     sheet = service.spreadsheets()
@@ -73,9 +75,9 @@ def get_daily_schedule(service, SPREADSHEET_ID=None, COURSE_SHEET=None):
 
     if (SPREADSHEET_ID == None or COURSE_SHEET == None):
         logging.warning("SPREADSHEET_ID and COURSE_SHEET range not defined in .env.")
-        return {}
+        return None
 
-    events = {}
+    events = []
 
     # Use Google Sheets API to fetch due dates.
     sheet = service.spreadsheets()
@@ -83,13 +85,30 @@ def get_daily_schedule(service, SPREADSHEET_ID=None, COURSE_SHEET=None):
     values = result.get("values", [])
 
     header = values[0] # Header row with column names.
+    now = datetime.now()
+    current_day = now.strftime("%A") # Formatted for weekday's full name.
 
     # Grab the indexes of the headers from A1:E1.
     index = {
         "course": header.index("Course Name"),
-        "day": header.index("Days of The Week"),
+        "day": header.index("Day"),
         "time": header.index("Time"),
+        "end_time": header.index("Ends"),
         "room": header.index("Room")
     }
+
+    for row in values[1:]:
+        if row[index["day"]] == current_day:
+            events.append(
+                {
+                    "entity-type": "EXTERNAL",
+                    "entity-metadata": f"Room {row[index['room']]}",
+                    "name": row[index["course"]],
+                    "privacy_level": 2, # Required value as per documentation.
+                    "scheduled_start_time": now.strftime(f"%Y-%m-%d {row[index['time']]}"),
+                    "scheduled_end_time": now.strftime(f"%Y-%m-%d {row[index['end_time']]}"),
+                    "description": f"{row[index['course']]} will take place on {now.strftime('%B %d')} at {now.strftime('%I:%M%p')} in Room {row[index['room']]}."
+                }
+            )
 
     return events
