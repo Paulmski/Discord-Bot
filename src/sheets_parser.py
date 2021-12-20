@@ -38,7 +38,7 @@ def fetch_due_dates(service, SPREADSHEET_ID=None, RANGE_NAME=None):
             # Should there be no IndexError raised...
             try:
                 # If the class name has changed from the A column, change the current_class variable.
-                if row[index['Course Name']] != '':
+                if row[index['Course Name']] != '' and not (row[index['Course Name']].startswith('Room') or row[index['Course Name']].startswith('Meetings')):
                     course = row[index['Course Name']]
 
                 # Assign the assignment name, due date, and days until due date.
