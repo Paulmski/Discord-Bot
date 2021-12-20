@@ -197,7 +197,7 @@ def main():
         embedded_message.add_field(name="", value="\nI am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
         
         # Send the message to the announcements channel.
-        await channel.send(message, embed=embedded_message, delete_after=86400.0)
+        await channel.send(message, embed=embedded_message, delete_after=20*60*60)
 
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
