@@ -19,6 +19,7 @@ def main():
     # Getting environment variables.
     SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
     RANGE_NAME = os.getenv("RANGE_NAME")
+    COURSE_SHEET = os.getenv("COURSE_SHEET")
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
     ANNOUNCEMENT_CHANNEL = os.getenv("ANNOUNCEMENT_CHANNEL")
     GUILD_ID = int(os.getenv("GUILD_ID"))
@@ -98,7 +99,7 @@ def main():
             logging.info(f"Scheduling to server {self.guild.name}.")
 
             # Get dictionary of events for the day from sheets_parser.get_daily_schedule().
-            schedule = sheets_parser.get_daily_schedule(service)
+            schedule = sheets_parser.get_daily_schedule(service, SPREADSHEET_ID, COURSE_SHEET)
             print(schedule)
 
         @schedule_events.before_loop
