@@ -21,6 +21,7 @@ def main():
     RANGE_NAME = os.getenv("RANGE_NAME")
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
     ANNOUNCEMENT_CHANNEL = os.getenv("ANNOUNCEMENT_CHANNEL")
+    GUILD_ID = os.getenv("GUILD_ID")
 
     # Logging formating to view time stamps and level of log information
     logging.basicConfig(
@@ -51,11 +52,11 @@ def main():
         def __init__(self):
             self.fetch_due_dates.start()
 
-        # Declare a function to unload the fetch_due_date cog.
+        # Declare a function to unload the fetch_due_date task.
         def cog_unload(self):
             self.fetch_due_dates.cancel()
 
-        # Declare the fetch_due_dates loop. Loop will run every 24 hours.
+        # Declare the fetch_due_dates loop. Loop will fully execute every 24 hours.
         @tasks.loop(minutes=60.0)
         async def fetch_due_dates(self, channel_id=None):
             if (datetime.now().hour != 6 and channel_id == None):
@@ -170,8 +171,9 @@ def main():
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
 
-    # Instantiate FetchDate class.
+    # Instantiate FetchDate and EventScheduler class.
     fetcher = FetchDate()
+    # scheduler = EventScheduler()
 
     # Run the bot using the DISCORD_TOKEN constant from .env.
     bot.run(DISCORD_TOKEN)
