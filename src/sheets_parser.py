@@ -1,6 +1,7 @@
 # file app/sheets_parser.py
 
 import logging
+from discord.http import Route
 
 def fetch_due_dates(service, SPREADSHEET_ID=None, RANGE_NAME=None):
 
@@ -65,3 +66,21 @@ def fetch_due_dates(service, SPREADSHEET_ID=None, RANGE_NAME=None):
                 pass
 
         return assignments
+
+def get_daily_schedule(service, SPREADSHEET_ID=None, RANGE_NAME=None):
+
+    if (SPREADSHEET_ID == None or RANGE_NAME == None):
+        return {}
+
+    events = {}
+    RANGE_BOOK = RANGE_NAME.split("!")[0]
+    FIRST_COLUMN_RANGE = f"{RANGE_BOOK}!A1:A"
+
+    # Use Google Sheets API to fetch due dates.
+    sheet = service.spreadsheets()
+    result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=FIRST_COLUMN_RANGE).execute()
+    values = result.get('values', [])
+
+    print([x for x in values])
+
+    return events
