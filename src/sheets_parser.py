@@ -3,33 +3,34 @@
 import logging
 from discord.http import Route
 
+# Returns a dictionary containing assignment information.
 def fetch_due_dates(service, SPREADSHEET_ID=None, RANGE_NAME=None):
 
     if (SPREADSHEET_ID == None or RANGE_NAME == None):
-        logging.warning('SPREADSHEET_ID or RANGE_NAME not defined in .env')
+        logging.warning("SPREADSHEET_ID or RANGE_NAME not defined in .env")
         return {}
 
     # Use Google Sheets API to fetch due dates.
     sheet = service.spreadsheets()
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
-    values = result.get('values', [])
+    values = result.get("values", [])
 
     # If no data was received, do not force any messages to be sent.
     if not values:
-        logging.warning('No data found.')
+        logging.warning("No data found.")
 
-    # Otherwise, send a message to @everyone about what assignments are due within a week.
+    # Otherwise, create and return a dictionary containing assignment information.
     else:
 
         header = values[0] # Header row with column names (A1:E1)
 
         # Grab the indexes of the headers from A1:E1.
         index = {
-            'Course Name': header.index('Course Name'),
-            'Assignment Name': header.index('Assignment Name'),
-            'Due Date': header.index('Due Date'),
-            'Days Until Due Date': header.index('Days Until Due Date'),
-            'Notes': header.index('Notes')
+            "course": header.index("Course Name"),
+            "assignment": header.index("Assignment Name"),
+            "due_date": header.index("Due Date"),
+            "days_until": header.index("Days Until Due Date"),
+            "notes": header.index("Notes")
         }
 
         # Declare assignments dictionary, will become an argument for announce_due_dates().
@@ -39,17 +40,17 @@ def fetch_due_dates(service, SPREADSHEET_ID=None, RANGE_NAME=None):
             # Should there be no IndexError raised...
             try:
                 # If the class name has changed from the A column, change the current_class variable.
-                if row[index['Course Name']] != '' and not (row[index['Course Name']].startswith('Room') or row[index['Course Name']].startswith('Meetings')):
-                    course = row[index['Course Name']]
+                if row[index["course"]] != "" and not (row[index["course"]].startswith("Room") or row[index["course"]].startswith("Meetings")):
+                    course = row[index["course"]]
 
                 # Assign the assignment name, due date, and days until due date.
-                assignment = row[index['Assignment Name']]
-                due_date = row[index['Due Date']]
-                days_left = row[index['Days Until Due Date']]
+                assignment = row[index["assignment"]]
+                due_date = row[index["due_date"]]
+                days_left = row[index["days_until"]]
 
                 # If there are notes in this row, assign the value to notes.
                 if len(row) == 5:
-                    notes = row[index['Notes']]
+                    notes = row[index["notes"]]
 
                 # Otherwise, just assign it as a blank value.
                 else:
@@ -67,20 +68,28 @@ def fetch_due_dates(service, SPREADSHEET_ID=None, RANGE_NAME=None):
 
         return assignments
 
-def get_daily_schedule(service, SPREADSHEET_ID=None, RANGE_NAME=None):
+# Returns JSON payloads to schedule events via HTTP.
+def get_daily_schedule(service, SPREADSHEET_ID=None, COURSE_SHEET=None):
 
-    if (SPREADSHEET_ID == None or RANGE_NAME == None):
+    if (SPREADSHEET_ID == None or COURSE_SHEET == None):
+        logging.warning("SPREADSHEET_ID and COURSE_SHEET range not defined in .env.")
         return {}
 
     events = {}
-    RANGE_BOOK = RANGE_NAME.split("!")[0]
-    FIRST_COLUMN_RANGE = f"{RANGE_BOOK}!A1:A"
 
     # Use Google Sheets API to fetch due dates.
     sheet = service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=FIRST_COLUMN_RANGE).execute()
-    values = result.get('values', [])
+    result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=COURSE_SHEET).execute()
+    values = result.get("values", [])
 
-    print([x for x in values])
+    header = values[0] # Header row with column names.
+
+    # Grab the indexes of the headers from A1:E1.
+    index = {
+        "course": header.index("Course Name"),
+        "day": header.index("Days of The Week"),
+        "time": header.index("Time"),
+        "room": header.index("Room")
+    }
 
     return events
