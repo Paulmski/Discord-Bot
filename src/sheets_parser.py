@@ -2,7 +2,6 @@
 
 import logging
 from time import strftime
-from discord.http import Route
 from datetime import datetime
 
 # Returns a dictionary containing assignment information.
