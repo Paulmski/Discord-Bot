@@ -5,11 +5,14 @@ def main():
     from discord.ext.commands import Bot
     from discord.ext import tasks, commands
     import discord.utils
+    from discord.http import Route
     import random
     import os
     from dotenv import load_dotenv
-    import gsapi_builder;
+    import gsapi_builder
+    import sheets_parser
     from datetime import datetime
+    from time import sleep
     import logging
 
     random.seed() # Seed the RNG.
@@ -18,8 +21,10 @@ def main():
     # Getting environment variables.
     SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
     RANGE_NAME = os.getenv("RANGE_NAME")
+    COURSE_SHEET = os.getenv("COURSE_SHEET")
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
     ANNOUNCEMENT_CHANNEL = os.getenv("ANNOUNCEMENT_CHANNEL")
+    GUILD_ID = int(os.getenv("GUILD_ID"))
 
     # Logging formating to view time stamps and level of log information
     logging.basicConfig(
@@ -50,72 +55,19 @@ def main():
         def __init__(self):
             self.fetch_due_dates.start()
 
-        # Declare a function to unload the fetch_due_date cog.
+        # Declare a function to unload the fetch_due_date task.
         def cog_unload(self):
             self.fetch_due_dates.cancel()
 
-        # Declare the fetch_due_dates loop. Loop will run every 24 hours.
+        # Declare the fetch_due_dates loop. Loop will fully execute every 24 hours.
         @tasks.loop(minutes=60.0)
         async def fetch_due_dates(self, channel_id=None):
             if (datetime.now().hour != 6 and channel_id == None):
                 return
             logging.info("Fetching due dates...")
 
-            # Use Google Sheets API to fetch due dates.
-            sheet = service.spreadsheets()
-            result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
-            values = result.get('values', [])
-
-            # If no data was received, do not force any messages to be sent.
-            if not values:
-                logging.warning('No data found.')
-
-            # Otherwise, send a message to @everyone about what assignments are due within a week.
-            else:
-
-                header = values[0] # Header row with column names (A1:E1)
-
-                # Grab the indexes of the headers from A1:E1.
-                index = {
-                    'Course Name': header.index('Course Name'),
-                    'Assignment Name': header.index('Assignment Name'),
-                    'Due Date': header.index('Due Date'),
-                    'Days Until Due Date': header.index('Days Until Due Date'),
-                    'Notes': header.index('Notes')
-                }
-
-                # Declare assignments dictionary, will become an argument for announce_due_dates().
-                assignments = {}
-
-                for row in values[1:]:
-                    # Should there be no IndexError raised...
-                    try:
-                        # If the class name has changed from the A column, change the current_class variable.
-                        if row[index['Course Name']] != '':
-                            course = row[index['Course Name']]
-
-                        # Assign the assignment name, due date, and days until due date.
-                        assignment = row[index['Assignment Name']]
-                        due_date = row[index['Due Date']]
-                        days_left = row[index['Days Until Due Date']]
-
-                        # If there are notes in this row, assign the value to notes.
-                        if len(row) == 5:
-                            notes = row[index['Notes']]
-
-                        # Otherwise, just assign it as a blank value.
-                        else:
-                            notes = ""
-
-                        # If the assignment is due in a week, add it to the final message to @everyone.
-                        if int(days_left) >= 0 and int(days_left) <= 7:
-                            if course not in assignments.keys():
-                                assignments[course] = []
-                            assignments[course].append([assignment, due_date, days_left, notes])
-
-                    # Otherwise, pass.
-                    except IndexError:
-                        pass
+            # Pass Sheets service and metadata to sheets_parser.fetch_due_dates()
+            assignments = sheets_parser.fetch_due_dates(service, SPREADSHEET_ID, RANGE_NAME)
 
             # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
             await announce_due_dates(assignments, channel_id=channel_id)
@@ -123,6 +75,45 @@ def main():
         @fetch_due_dates.before_loop
         async def before_fetch(self):
             logging.debug("Initiating data fetching.")
+
+    # Declare EventScheduler Cog.
+    class EventScheduler(commands.Cog):
+
+        def __init__(self):
+            self.schedule_events()
+            self.guild = None
+
+        # Declare a function to unload the schedule_events task.
+        def cog_unload(self):
+            self.schedule_events.cancel()
+
+        # Declare the schedule_events loop, which fully executes every 24 hours.
+        @tasks.loop(minutes=60.0)
+        async def schedule_events(self):
+            
+            # Set the class' guild state (bot.get_guild() returns a Guild object)
+            self.guild = bot.get_guild(GUILD_ID)
+            
+            if (datetime.now().hour != 6):
+                return
+
+            await bot.wait_until_ready() # Bot needs to wait until ready, especially on the first iteration.
+
+            logging.info(f"Scheduling to server {self.guild.name}.")
+
+            # Get dictionary of daily event JSON payloads from sheets_parser.get_daily_schedule().
+            schedule = sheets_parser.get_daily_schedule(service, SPREADSHEET_ID, COURSE_SHEET)
+
+            # Post events using HTTP.
+            route = Route("POST", f"/guilds/{GUILD_ID}/scheduled-events", guild_id=GUILD_ID)
+            for event in schedule:
+                await bot.http.request(route, json=event)
+                sleep(0.5) # Waiting 0.5 seconds to prevent API limiting.
+                
+
+        @schedule_events.before_loop
+        async def before_scheduling(self):
+            logging.debug("Initiating event scheduler.")
 
     # Declare a function to send an announcement to a hard-coded channel number in .env.
     @bot.event
@@ -222,8 +213,9 @@ def main():
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
 
-    # Instantiate FetchDate class.
+    # Instantiate FetchDate and EventScheduler class.
     fetcher = FetchDate()
+    scheduler = EventScheduler()
 
     # Run the bot using the DISCORD_TOKEN constant from .env.
     bot.run(DISCORD_TOKEN)
