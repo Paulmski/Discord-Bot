@@ -91,23 +91,24 @@ def main():
         @tasks.loop(minutes=60.0)
         async def schedule_events(self):
             
+            # Set the class' guild state (bot.get_guild() returns a Guild object)
             self.guild = bot.get_guild(GUILD_ID)
             
             if (datetime.now().hour != 6):
                 return
 
-            await bot.wait_until_ready()
+            await bot.wait_until_ready() # Bot needs to wait until ready, especially on the first iteration.
 
             logging.info(f"Scheduling to server {self.guild.name}.")
 
-            # Get dictionary of events for the day from sheets_parser.get_daily_schedule().
+            # Get dictionary of daily event JSON payloads from sheets_parser.get_daily_schedule().
             schedule = sheets_parser.get_daily_schedule(service, SPREADSHEET_ID, COURSE_SHEET)
 
             # Post events using HTTP.
             route = Route("POST", f"/guilds/{GUILD_ID}/scheduled-events", guild_id=GUILD_ID)
             for event in schedule:
                 await bot.http.request(route, json=event)
-                sleep(0.5) # Waiting 0.5 seconds to prevent sending API calls too fast.
+                sleep(0.5) # Waiting 0.5 seconds to prevent API limiting.
                 
 
         @schedule_events.before_loop
