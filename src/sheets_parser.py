@@ -2,7 +2,7 @@
 
 import logging
 from time import strftime
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Returns a dictionary containing assignment information.
 def fetch_due_dates(service, SPREADSHEET_ID=None, RANGE_NAME=None):
@@ -98,14 +98,20 @@ def get_daily_schedule(service, SPREADSHEET_ID=None, COURSE_SHEET=None):
 
     for row in values[1:]:
         if row[index["day"]] == current_day:
+
+            # Convert EST times to GMT times.
+            # Timezone translation UTC-05:00 to UTC+00:00.
+            gmt_start_time = datetime.strptime(now.strftime(f"%Y-%m-%dT") + row[index['time']], "%Y-%m-%dT%H:%M") + timedelta(hours=5)
+            gmt_end_time = datetime.strptime(now.strftime(f"%Y-%m-%dT") + row[index['end_time']], "%Y-%m-%dT%H:%M") + timedelta(hours=5)
+
             events.append(
                 {
-                    "entity-type": "EXTERNAL",
-                    "entity-metadata": f"Room {row[index['room']]}",
+                    "entity_type": 3, # Value 3 is EXTERNAL events.
+                    "entity_metadata": { "location": f"Room {row[index['room']]}" },
                     "name": row[index["course"]],
                     "privacy_level": 2, # Required value as per documentation.
-                    "scheduled_start_time": now.strftime(f"%Y-%m-%d {row[index['time']]}"),
-                    "scheduled_end_time": now.strftime(f"%Y-%m-%d {row[index['end_time']]}"),
+                    "scheduled_start_time": str(gmt_start_time),
+                    "scheduled_end_time": str(gmt_end_time),
                     "description": f"{row[index['course']]} will take place on {now.strftime('%B %d')} at {now.strftime('%I:%M%p')} in Room {row[index['room']]}."
                 }
             )
