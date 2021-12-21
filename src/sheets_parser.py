@@ -103,6 +103,10 @@ def get_daily_schedule(service, SPREADSHEET_ID=None, COURSE_SHEET=None):
             # Timezone translation UTC-05:00 to UTC+00:00.
             gmt_start_time = datetime.strptime(now.strftime(f"%Y-%m-%dT") + row[index['time']], "%Y-%m-%dT%H:%M") + timedelta(hours=5)
             gmt_end_time = datetime.strptime(now.strftime(f"%Y-%m-%dT") + row[index['end_time']], "%Y-%m-%dT%H:%M") + timedelta(hours=5)
+            
+            # 12-hour time conversions.
+            th_start_time = datetime.strptime(row[index["time"]], "%H:%M").strftime("%I:%M%p")
+            th_end_time = datetime.strptime(row[index["end_time"]], "%H:%M").strftime("%I:%M%p")
 
             events.append(
                 {
@@ -112,7 +116,7 @@ def get_daily_schedule(service, SPREADSHEET_ID=None, COURSE_SHEET=None):
                     "privacy_level": 2, # Required value as per documentation.
                     "scheduled_start_time": str(gmt_start_time),
                     "scheduled_end_time": str(gmt_end_time),
-                    "description": f"{row[index['course']]} will take place on {now.strftime('%B %d')} at {now.strftime('%I:%M%p')} in Room {row[index['room']]}."
+                    "description": f"{row[index['course']]} will take place on {gmt_start_time.strftime('%B %d')} from {th_start_time} to {th_end_time} in Room {row[index['room']]}."
                 }
             )
 
