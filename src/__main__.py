@@ -80,7 +80,7 @@ def main():
     class EventScheduler(commands.Cog):
 
         def __init__(self):
-            self.schedule_events()
+            self.schedule_events.start()
             self.guild = None
 
         # Declare a function to unload the schedule_events task.
