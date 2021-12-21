@@ -5,12 +5,14 @@ def main():
     from discord.ext.commands import Bot
     from discord.ext import tasks, commands
     import discord.utils
+    from discord.http import Route
     import random
     import os
     from dotenv import load_dotenv
     import gsapi_builder
     import sheets_parser
     from datetime import datetime
+    from time import sleep
     import logging
 
     random.seed() # Seed the RNG.
@@ -92,24 +94,26 @@ def main():
             self.guild = bot.get_guild(GUILD_ID)
             guild_id = self.guild.id
             
-            # if (datetime.now().hour != 6):
-            if False: # HACK: Debug condition for IF statement.
+            if (datetime.now().hour != 6):
                 return
+
+            await bot.wait_until_ready()
 
             logging.info(f"Scheduling to server {self.guild.name}.")
 
             # Get dictionary of events for the day from sheets_parser.get_daily_schedule().
             schedule = sheets_parser.get_daily_schedule(service, SPREADSHEET_ID, COURSE_SHEET)
-            print(schedule)
+            # print(schedule)
+            # Post events using HTTP.
+            route = Route("POST", f"/guilds/{GUILD_ID}/scheduled-events", guild_id=GUILD_ID)
+            for event in schedule:
+                await bot.http.request(route, json=event)
+                sleep(0.5) # Waiting 0.5 seconds to prevent sending API calls too fast.
+                
 
         @schedule_events.before_loop
         async def before_scheduling(self):
             logging.debug("Initiating event scheduler.")
-
-    # HACK: Debug event scheduler.
-    @bot.command(pass_context=True)
-    async def schedule(ctx):
-        await scheduler.schedule_events()
 
     # Declare a function to send an announcement to a hard-coded channel number in .env.
     @bot.event
