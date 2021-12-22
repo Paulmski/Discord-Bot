@@ -102,12 +102,17 @@ def get_daily_schedule(service, SPREADSHEET_ID=None, COURSE_SHEET=None):
             # Convert EST times to GMT times.
             # Timezone translation UTC-05:00 to UTC+00:00.
             gmt_start_time = datetime.strptime(now.strftime(f"%Y-%m-%dT") + row[index['time']], "%Y-%m-%dT%H:%M") + timedelta(hours=5)
+
+            # Only returns events that are in the future.
+            if gmt_start_time < datetime.now():
+                continue
             gmt_end_time = datetime.strptime(now.strftime(f"%Y-%m-%dT") + row[index['end_time']], "%Y-%m-%dT%H:%M") + timedelta(hours=5)
             
             # 12-hour time conversions.
             th_start_time = datetime.strptime(row[index["time"]], "%H:%M").strftime("%I:%M%p")
             th_end_time = datetime.strptime(row[index["end_time"]], "%H:%M").strftime("%I:%M%p")
-
+            
+            
             events.append(
                 {
                     "entity_type": 3, # Value 3 is EXTERNAL events.
