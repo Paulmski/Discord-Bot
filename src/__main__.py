@@ -14,7 +14,7 @@ def main():
     from datetime import datetime
     from time import sleep
     import logging
-    import classes.events as events
+    import events as events
 
     random.seed() # Seed the RNG.
     load_dotenv()
@@ -51,65 +51,6 @@ def main():
     async def on_connect():
         logging.info("--Connected to server--")
 
-    # Declare a function to send an announcement to a hard-coded channel number in .env.
-    @bot.event
-    async def announce_due_dates(due_date_dictionary, channel_id=None):
-        # Preface with @everyone header.
-        message = "@everyone"
-
-        # Instantiate the Embed.
-        embedded_message = discord.Embed(title="Due Dates For Today", colour=discord.Colour.from_rgb(160, 165, 25))
-
-        await bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
-
-        # Checks if a channel_id has been passed as an argument, then checks .env ANNOUNCEMENT_CHANNEL, then checks for announcements channel, otherwises returns error.
-        if bot.get_channel(channel_id) != None:
-            # If a channel ID is provided that means the function was called on demand, meaning @everyone should be avoided.
-            message = ""
-            channel = bot.get_channel(channel_id)
-        elif bot.get_channel(int(ANNOUNCEMENT_CHANNEL)) != None:
-            channel = bot.get_channel(int(ANNOUNCEMENT_CHANNEL))
-        elif discord.utils.get(bot.get_all_channels(), name="announcements") != None:
-            channel = discord.utils.get(bot.get_all_channels(), name="announcements")
-        else:
-            logging.error("Unable to find channel to send announcement to.")
-            return
-
-        # For every course in the due date dictionary...
-        for course in due_date_dictionary.keys():
-            course_assignments = ""
-            for assignment in due_date_dictionary[course]:
-
-                # Parse the information from the assignment list.
-                name = assignment[0]
-                due_date = assignment[1]
-                days_left = int(assignment[2])
-
-                # Change days_left to a different code block color depending on days left.
-                if days_left > 3:
-                    days_left = f"```diff\n+ {days_left} days remaining.```"
-                elif days_left > 0:
-                    days_left = f"```fix\n- {days_left} days remaining.```"
-                else:
-                    days_left = f"```diff\n- {days_left} days remaining.```"
-
-                notes = assignment[3]
-
-                # Append the information to the course_assignments.
-                if notes == "":
-                    course_assignments += f"\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}\n\n"
-                else:
-                    course_assignments += f"\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}__Notes:__\n{notes}\n"
-            
-            # Add an extra embed field for the every course.
-            embedded_message.add_field(name=f"__{course}__", value=course_assignments + "", inline=False)
-
-        # Add project information to bottom.
-        embedded_message.add_field(name="", value="\nI am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
-        
-        # Send the message to the announcements channel.
-        await channel.send(message, embed=embedded_message, delete_after=86400.0)
-
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
     async def coinflip(ctx):
@@ -143,14 +84,18 @@ def main():
     async def homework(ctx):
         await fetcher.fetch_due_dates(channel_id=ctx.channel.id)
 
-
     # Print the message back.
-    @bot.command()
+    @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
 
+    # Command to debug Event Scheduling.
+    # @bot.command(pass_context=True)
+    # async def schedule(ctx):
+    #     await scheduler.schedule_events()
+
     # Instantiate FetchDate and EventScheduler class.
-    fetcher = events.FetchDate()
+    fetcher = events.FetchDate(service=service, bot=bot)
     scheduler = events.EventScheduler(service=service, bot=bot)
 
     # Run the bot using the DISCORD_TOKEN constant from .env.
