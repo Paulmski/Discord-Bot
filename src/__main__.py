@@ -14,7 +14,7 @@ def main():
     from datetime import datetime
     from time import sleep
     import logging
-    import events
+    import classes.events as events
 
     random.seed() # Seed the RNG.
     load_dotenv()
