@@ -46,14 +46,14 @@ def fetch_due_dates(service, SPREADSHEET_ID=None, RANGE_NAME=None):
 
                 # If the class name has changed from the A column, change the current course.
                 if row[index["course"]] != "":
-                    c_course = row[index["course"]]
-                    assignments[c_course] = []
+                    course = row[index["course"]]
+                    assignments[course] = []
 
-                c_asgnmt = Assignment()
-                c_asgnmt.parse_values(row, index)
+                assignment = Assignment()
+                assignment.parse_values(row, index)
 
-                if c_asgnmt.days_left >= 0 and c_asgnmt.days_left <= 7:
-                    assignments[c_course].append([c_asgnmt.name, c_asgnmt.due.strftime("%B %d"), c_asgnmt.days_left, c_asgnmt.note])
+                if assignment.days_left >= 0 and assignment.days_left <= 7:
+                    assignments[course].append([assignment.name, assignment.due.strftime("%B %d"), assignment.days_left, assignment.note])
 
             # Otherwise, pass.
             except IndexError:
@@ -93,23 +93,23 @@ def get_daily_schedule(service, SPREADSHEET_ID=None, COURSE_SHEET=None):
     for row in values[1:]:
         if row[index["day"]] == current_day:
 
-            c_class = Course()
-            c_class.parse_state(row, index)
+            course = Course()
+            course.parse_state(row, index)
 
             # Only returns events that are in the future.
             # Convert c_class GMT state to EST (GMT-05:00)
-            if c_class.start_time + timedelta(hours=-5) < now:
+            if course.start_time + timedelta(hours=-5) < now:
                 continue
             
             events.append(
                 {
                     "entity_type": 3, # Value 3 is EXTERNAL events.
-                    "entity_metadata": { "location": f"Room {c_class.room}" },
-                    "name": f"{c_class.code} - {c_class.name}",
+                    "entity_metadata": { "location": f"Room {course.room}" },
+                    "name": f"{course.code} - {course.name}",
                     "privacy_level": 2, # Required value as per documentation.
-                    "scheduled_start_time": str(c_class.start_time),
-                    "scheduled_end_time": str(c_class.end_time),
-                    "description": c_class.description
+                    "scheduled_start_time": str(course.start_time),
+                    "scheduled_end_time": str(course.end_time),
+                    "description": course.description
                 }
             )
 
