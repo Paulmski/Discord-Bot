@@ -7,6 +7,7 @@ import logging
 import sheets_parser
 from discord.http import Route
 from dotenv import load_dotenv
+from classes.Assignment import Assignment
 
 load_dotenv()
 SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
@@ -35,22 +36,28 @@ class FetchDate(commands.Cog):
         logging.info("Fetching due dates...")
 
         # Pass Sheets service and metadata to sheets_parser.fetch_due_dates()
-        assignments = sheets_parser.fetch_due_dates(self.service, SPREADSHEET_ID, RANGE_NAME)
+        assignments = sheets_parser.fetch_assignments(self.service, SPREADSHEET_ID, RANGE_NAME)
+        final_assignments = []
+        for i, assignment in enumerate(assignments):
+            # Only assignments that are in the next 7 days will be shown.
+            if assignment.days_left <= 7 or assignment.days_left >= 0:
+                final_assignments.append(assignment)
 
         # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
-        await self.announce_due_dates(assignments, channel_id=channel_id)
+        await self.announce_assignments(final_assignments, title="Due Dates For Today",
+channel_id=channel_id)
 
     @fetch_due_dates.before_loop
     async def before_fetch(self):
         logging.debug("Initiating data fetching.")
 
     # Declare a function to send an announcement to a hard-coded channel number in .env.
-    async def announce_due_dates(self, due_date_dictionary, channel_id=None):
+    async def announce_assignments(self, due_dates, title: str, channel_id=None):
         # Preface with @everyone header.
         message = "@everyone"
 
         # Instantiate the Embed.
-        embedded_message = discord.Embed(title="Due Dates For Today", colour=discord.Colour.from_rgb(160, 165, 25))
+        embedded_message = discord.Embed(title=title, colour=discord.Colour.from_rgb(160, 165, 25))
 
         await self.bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
 
@@ -66,43 +73,63 @@ class FetchDate(commands.Cog):
         else:
             logging.error("Unable to find channel to send announcement to.")
             return
-
+          
         # For every course in the due date dictionary...
-        for course in due_date_dictionary.keys():
-            if due_date_dictionary[course] == []:
-                continue
-            course_assignments = ""
-            for assignment in due_date_dictionary[course]:
-
-                # Parse the information from the assignment list.
-                name = assignment[0]
-                due_date = assignment[1]
-                days_left = assignment[2]
-
-                # Change days_left to a different code block color depending on days left.
-                if days_left > 3:
-                    days_left = f"```diff\n+ {days_left} days remaining.```"
-                elif days_left > 0:
-                    days_left = f"```fix\n- {days_left} days remaining.```"
-                else:
-                    days_left = f"```diff\n- {days_left} days remaining.```"
-
-                notes = assignment[3]
-
-                # Append the information to the course_assignments.
-                if notes == "":
-                    course_assignments += f"\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}\n"
-                else:
-                    course_assignments += f"\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}__Notes:__\n{notes}\n"
             
-            # Add an extra embed field for every course.
-            embedded_message.add_field(name=f"__{course}__", value=course_assignments + "", inline=False)
+        course_assignments = ""
+        due_dates_count = len(due_dates)-1
+        print(due_dates_count)
+        print(due_dates)
+
+
+        current_course = ""
+        for i, assignment in enumerate(due_dates):
+            
+
+            if current_course != "" and current_course != assignment.course_name:
+                embedded_message.add_field(name=f"__{current_course}__", value=course_assignments + "", inline=False)
+                course_assignments = ""
+                course_assignments += self.format_assignment(assignment)
+            elif i == due_dates_count:
+                course_assignments += self.format_assignment(assignment)
+                embedded_message.add_field(name=f"__{current_course}__", value=course_assignments + "", inline=False)
+            else:
+                course_assignments += self.format_assignment(assignment)
+
+
+            if assignment.course_name != "":
+                current_course = assignment.course_name
+
+           
 
         # Add project information to bottom.
         embedded_message.add_field(name="", value="\nI am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
-        
+    
         # Send the message to the announcements channel.
         await channel.send(message, embed=embedded_message, delete_after=86400.0)
+
+
+    def format_assignment(self, assignment: Assignment):
+    # Parse the information from the assignment list.
+        name = assignment.name
+        due_date = assignment.due.strftime("%B A%, %Y")
+        days_left = assignment.days_left
+
+        # Change days_left to a different code block color depending on days left.
+        if days_left > 3:
+            days_left = f"```diff\n+ {days_left} days remaining.```"
+        elif days_left > 0:
+            days_left = f"```fix\n- {days_left} days remaining.```"
+        else:
+            days_left = f"```diff\n- {days_left} days remaining.```"
+
+        notes = assignment.note
+
+        # Append the information to the course_assignments.
+        if notes == "":
+            return f"\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}\n"
+        else:
+            return f"\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}__Notes:__\n{notes}\n"
 
 # Declare EventScheduler Cog.
 class EventScheduler(commands.Cog):
@@ -129,15 +156,23 @@ class EventScheduler(commands.Cog):
         logging.info(f"Scheduling to server {guild.name}.")
 
         # Get dictionary of daily event JSON payloads from sheets_parser.get_daily_schedule().
-        schedule = sheets_parser.get_daily_schedule(self.service, SPREADSHEET_ID, COURSE_SHEET)
+        schedule = sheets_parser.fetch_courses(self.service, SPREADSHEET_ID, COURSE_SHEET)
 
         if schedule == []:
             logging.info("No events were scheduled.")
         # Post events using HTTP.
         route = Route("POST", f"/guilds/{GUILD_ID}/scheduled-events", guild_id=GUILD_ID)
-        for event in schedule:
-            await self.bot.http.request(route, json=event)
-            sleep(0.5) # Waiting 0.5 seconds to prevent API limiting.
+
+        now = datetime.now()
+        current_day = now.strftime("%A") # Formatted for weekday's full name.
+        for course in schedule:
+            if course.day == current_day and course.start_time > now:
+                print(course.start_time)
+                print(now)
+                event = course.to_json_event()
+                print(event)
+                await self.bot.http.request(route, json=event)
+                sleep(0.5) # Waiting 0.5 seconds to prevent API limiting.
             
 
     @schedule_events.before_loop

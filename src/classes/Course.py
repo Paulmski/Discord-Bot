@@ -99,11 +99,12 @@ class Course():
         th_start_time = datetime.strptime(parsed_data["start_time"], "%H:%M").strftime("%I:%M%p")
         th_end_time = datetime.strptime(parsed_data["end_time"], "%H:%M").strftime("%I:%M%p")
 
-        self._code = parsed_data["code"]
-        self._name = parsed_data["name"]
-        self._day = parsed_data["day"]
-        self._start_time = gmt_start_time
-        self._end_time = gmt_end_time
-        self._room = parsed_data["room"]
-        self._status = parsed_data["status"]
-        self._description = f"{self.code} - {self.name} will take place on {gmt_start_time.strftime('%A, %B %d')} from {th_start_time} to {th_end_time} in Room {self.room}."
+        self.code = parsed_data["code"]
+        self.name = parsed_data["name"]
+        self.day = parsed_data["day"]
+        self.start_time = gmt_start_time
+        self.end_time = gmt_end_time
+        self.room = parsed_data["room"]
+        self.status = parsed_data["status"]
+        self.description = f"{self.code} - {self.name} will take place on {gmt_start_time.strftime('%A, %B %d')} from {th_start_time} to {th_end_time} in Room {self.room}."
+

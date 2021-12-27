@@ -4,12 +4,13 @@ from .parse_data import parse_data
 # Class to represent all assignments
 class Assignment():
     
-    def __init__(self, code="", name="", due=datetime.now(), days_left=-1, note=""):
+    def __init__(self, code="", name="", due=datetime.now(), days_left=-1, note="", course_name=""):
         self.code = code
         self.name = name
         self.due = due
         self.days_left = days_left
         self.note = note
+        self.course_name = course_name
         
     # Course code 
     @property
@@ -65,19 +66,34 @@ class Assignment():
         if not isinstance(note, str):
             raise TypeError("Invalid note argument. Must be a string")
         self._note = note
+
+
+
+    @property
+    def course_name(self):
+        return self._course_name
+
+    @course_name.setter
+    def course_name(self, course_name):
+        if not isinstance(course_name, str):
+            raise TypeError("Invalid course_name argument. Must be a string")
+        self._course_name = course_name
+    
             
     # Parse values from Sheets row_data to set the state.
-    def parse_values(self, row_data, indexes):
+    def parse_state(self, row_data, indexes):
+
 
         parsed_data = parse_data(row_data, indexes)
 
         # If due_date from the parsed_data is empty, it's must be an empty row.
-        if parsed_data["due_date"] == "":
+        if parsed_data["due_date"] == None or parsed_data["due_date"] == "":
             return
 
-        self._code = parsed_data["code"]
-        self._name = parsed_data["assignment"]
-        self._due = datetime.strptime(parsed_data["due_date"], "%B %d")
-        self._days_left = int(parsed_data["days_left"])
+        self.code = parsed_data["code"]
+        self.name = parsed_data["assignment"]
+        self.due = datetime.strptime(parsed_data["due_date"], "%B %d")
+        self.days_left = int(parsed_data["days_left"])
+        self.course_name = parsed_data["course_name"]
         if parsed_data["notes"] != None:
-            self._note = parsed_data["notes"]
+            self.note = parsed_data["notes"]

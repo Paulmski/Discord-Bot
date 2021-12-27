@@ -84,6 +84,46 @@ def main():
     async def homework(ctx):
         await fetcher.fetch_due_dates(channel_id=ctx.channel.id)
 
+
+
+    @bot.command(pass_context=True)
+    async def list(ctx, code=None):
+        if code == None:
+            await ctx.channel.send('Invalid code entered, make sure you have the right course code e.g. "!list comp1271".')
+            return
+        
+        code = code.upper()
+
+
+        assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
+        final_assignments = []
+        # Remove all courses that don't have a matching course code
+        if code == 'ALL':
+            final_assignments = assignments
+        else:
+            for assignment in assignments:
+             
+                print(vars(assignment))
+                if assignment.code == code:
+                    final_assignments.append(assignment)
+
+
+
+
+
+        # No matching assignments found.
+        if final_assignments == []:
+            await ctx.channel.send('Could\'nt find any assignments matching the course code "{}".'.format(code))
+            return
+        title = "Assignments for {}".format(code)
+        await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
+        
+
+
+
+
+
+
     # Print the message back.
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
