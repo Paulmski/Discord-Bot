@@ -81,12 +81,12 @@ class Assignment():
     
             
     # Parse values from Sheets row_data to set the state.
-    def parse_values(self, row_data, indexes):
+    def parse_state(self, row_data, indexes):
 
         parsed_data = parse_data(row_data, indexes)
 
         # If due_date from the parsed_data is empty, it's must be an empty row.
-        if parsed_data["due_date"] == "":
+        if parsed_data["due_date"] == None or parsed_data["due_date"] == "":
             return
 
         self.code = parsed_data["code"]
