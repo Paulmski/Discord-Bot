@@ -73,7 +73,7 @@ channel_id=channel_id)
         else:
             logging.error("Unable to find channel to send announcement to.")
             return
-        
+          
         # For every course in the due date dictionary...
             
         course_assignments = ""
@@ -147,7 +147,8 @@ class EventScheduler(commands.Cog):
     @tasks.loop(minutes=60.0)
     async def schedule_events(self):
         
-       
+        if (datetime.now().hour != 6):
+            return
 
         await self.bot.wait_until_ready() # Bot needs to wait until ready, especially on the first iteration.
         # Set the class' guild state (bot.get_guild() returns a Guild object)
@@ -161,7 +162,7 @@ class EventScheduler(commands.Cog):
             logging.info("No events were scheduled.")
         # Post events using HTTP.
         route = Route("POST", f"/guilds/{GUILD_ID}/scheduled-events", guild_id=GUILD_ID)
-        
+
         now = datetime.now()
         current_day = now.strftime("%A") # Formatted for weekday's full name.
         for course in schedule:

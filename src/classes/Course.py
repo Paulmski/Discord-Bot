@@ -107,3 +107,4 @@ class Course():
         self.room = parsed_data["room"]
         self.status = parsed_data["status"]
         self.description = f"{self.code} - {self.name} will take place on {gmt_start_time.strftime('%A, %B %d')} from {th_start_time} to {th_end_time} in Room {self.room}."
+

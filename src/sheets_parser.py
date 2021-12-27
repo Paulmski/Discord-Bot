@@ -34,7 +34,6 @@ def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
             "days_left": header.index("Days Left"),
             "notes": header.index("Notes"),
             "course_name": header.index("Course")
-            
         }
 
         # Declare assignments dictionary, will become an argument for announce_due_dates().
@@ -42,13 +41,11 @@ def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
 
         for row in values[1:]:
             # This means the row is missing a title and should be skipped (it is probably missing other key information).
-         
-
             assignment = Assignment()
             assignment.parse_state(row, index)
             if assignment.name != '':
                 assignments.append(assignment)
-                
+          
 
         return assignments
 
@@ -82,6 +79,5 @@ def fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET):
         course = Course()
         course.parse_state(row, index)
         courses.append(course)
-
 
     return courses
