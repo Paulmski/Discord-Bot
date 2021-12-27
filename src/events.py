@@ -37,14 +37,14 @@ class FetchDate(commands.Cog):
 
         # Pass Sheets service and metadata to sheets_parser.fetch_due_dates()
         assignments = sheets_parser.fetch_assignments(self.service, SPREADSHEET_ID, RANGE_NAME)
-
+        final_assignments = []
         for i, assignment in enumerate(assignments):
             # Only assignments that are in the next 7 days will be shown.
-            if assignment.days_left > 7 or assignment.days_left < 0:
-                del assignments[i]
+            if assignment.days_left <= 7 or assignment.days_left >= 0:
+                final_assignments.append(assignment)
 
         # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
-        await self.announce_due_dates(assignments, title="Due Dates For Today",
+        await self.announce_assignments(final_assignments, title="Due Dates For Today",
 channel_id=channel_id)
 
     @fetch_due_dates.before_loop
@@ -52,7 +52,7 @@ channel_id=channel_id)
         logging.debug("Initiating data fetching.")
 
     # Declare a function to send an announcement to a hard-coded channel number in .env.
-    async def announce_due_dates(self, due_dates, title: str, channel_id=None):
+    async def announce_assignments(self, due_dates, title: str, channel_id=None):
         # Preface with @everyone header.
         message = "@everyone"
 
@@ -155,7 +155,7 @@ class EventScheduler(commands.Cog):
         logging.info(f"Scheduling to server {guild.name}.")
 
         # Get dictionary of daily event JSON payloads from sheets_parser.get_daily_schedule().
-        schedule = sheets_parser.get_courses(self.service, SPREADSHEET_ID, COURSE_SHEET)
+        schedule = sheets_parser.fetch_courses(self.service, SPREADSHEET_ID, COURSE_SHEET)
 
         if schedule == []:
             logging.info("No events were scheduled.")
