@@ -92,7 +92,7 @@ class FetchDate(commands.Cog):
             elif i == due_dates_count:
                 course_assignments += self.format_assignment(assignment)
                 embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
-                
+
             # Otherwise, add the assignment to course_assignments as normal.
             else:
                 course_assignments += self.format_assignment(assignment)
