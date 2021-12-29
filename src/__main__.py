@@ -15,6 +15,7 @@ def main():
     from time import sleep
     import logging
     import events as events
+    import elections
 
     random.seed() # Seed the RNG.
     load_dotenv()
@@ -92,7 +93,6 @@ def main():
         
         code = code.upper()
 
-
         assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
         final_assignments = []
         # Remove all courses that don't have a matching course code
@@ -125,6 +125,7 @@ def main():
     # Instantiate FetchDate and EventScheduler class.
     fetcher = events.FetchDate(service=service, bot=bot)
     scheduler = events.EventScheduler(service=service, bot=bot)
+    election = elections.ElectionSystem(bot=bot)
 
     # Run the bot using the DISCORD_TOKEN constant from .env.
     bot.run(DISCORD_TOKEN)
