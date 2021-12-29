@@ -74,23 +74,31 @@ channel_id=channel_id)
             logging.error("Unable to find channel to send announcement to.")
             return
           
-        # For every course in the due date dictionary...
-            
+        # For every course in the due date list...
         course_assignments = ""
         due_dates_count = len(due_dates) - 1
-
         current_course = ""
+
         for i, assignment in enumerate(due_dates):
+
+            is_due_soon = assignment.days_left >= 0 and assignment.days_left <= 7
             
-            if current_course != "" and current_course != assignment.course_name:
-                embedded_message.add_field(name=f"__{current_course}__", value=course_assignments + "", inline=False)
-                course_assignments = ""
-                course_assignments += self.format_assignment(assignment)
-            elif i == due_dates_count:
-                course_assignments += self.format_assignment(assignment)
-                embedded_message.add_field(name=f"__{current_course}__", value=course_assignments + "", inline=False)
-            else:
-                course_assignments += self.format_assignment(assignment)
+            # If the assignment is due soon, add it accordingly.
+            if is_due_soon:
+                # Preface with a new field if it is a new course.
+                if current_course != "" and current_course != assignment.course_name:
+                    embedded_message.add_field(name=f"__{current_course}__", value="", inline=False)
+                    course_assignments = ""
+                    course_assignments += self.format_assignment(assignment)
+
+                # Otherwise, if it is the last element...
+                elif i == due_dates_count:
+                    course_assignments += self.format_assignment(assignment)
+                    embedded_message.add_field(name=f"__{current_course}__", value=course_assignments + "", inline=False)
+                
+                # Otherwise, add the assignment list as normal.
+                else:
+                    course_assignments += self.format_assignment(assignment)
 
             if assignment.course_name != "":
                 current_course = assignment.course_name
@@ -104,7 +112,7 @@ channel_id=channel_id)
     def format_assignment(self, assignment: Assignment):
     # Parse the information from the assignment list.
         name = assignment.name
-        due_date = assignment.due.strftime("%B A%, %Y")
+        due_date = assignment.due.strftime("%A, %B %d")
         days_left = assignment.days_left
 
         # Change days_left to a different code block color depending on days left.

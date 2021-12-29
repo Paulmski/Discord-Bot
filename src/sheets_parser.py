@@ -34,7 +34,7 @@ def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
             "course_name": header.index("Course")
         }
 
-        # Declare assignments dictionary, will become an argument for announce_due_dates().
+        # Declare assignments list, will become an argument for announce_assignments() in events.py.
         assignments = []
 
         for row in values[1:]:
@@ -70,7 +70,6 @@ def fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET):
     }
 
     for row in values[1:]:
-
         course = Course()
         course.parse_state(row, index)
         courses.append(course)

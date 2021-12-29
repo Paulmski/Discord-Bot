@@ -93,9 +93,9 @@ def main():
             return
         
         code = code.upper()
-
         assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
         final_assignments = []
+
         # Remove all courses that don't have a matching course code
         if code == 'ALL':
             final_assignments = assignments
@@ -106,7 +106,7 @@ def main():
 
         # No matching assignments found.
         if final_assignments == []:
-            await ctx.channel.send('Could\'nt find any assignments matching the course code "{}".'.format(code))
+            await ctx.channel.send('Couldn\'t find any assignments matching the course code "{}".'.format(code))
             return
         title = "Assignments for {}".format(code)
         await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
@@ -115,13 +115,6 @@ def main():
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
-
-    #
-
-    # Command to debug Event Scheduling.
-    # @bot.command(pass_context=True)
-    # async def schedule(ctx):
-    #     await scheduler.schedule_events()
 
     # Instantiate FetchDate and EventScheduler class.
     fetcher = events.FetchDate(service=service, bot=bot)
