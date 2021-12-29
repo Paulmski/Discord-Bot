@@ -77,9 +77,7 @@ channel_id=channel_id)
         # For every course in the due date dictionary...
             
         course_assignments = ""
-        due_dates_count = len(due_dates)-1
-        print(due_dates_count)
-        print(due_dates)
+        due_dates_count = len(due_dates) - 1
 
         current_course = ""
         for i, assignment in enumerate(due_dates):
@@ -161,10 +159,7 @@ class EventScheduler(commands.Cog):
         current_day = now.strftime("%A") # Formatted for weekday's full name.
         for course in schedule:
             if course.day == current_day and course.start_time > now:
-                print(course.start_time)
-                print(now)
                 event = course.to_json_event()
-                print(event)
                 await self.bot.http.request(route, json=event)
                 sleep(0.5) # Waiting 0.5 seconds to prevent API limiting.
             

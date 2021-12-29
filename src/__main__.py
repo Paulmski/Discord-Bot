@@ -85,6 +85,7 @@ def main():
     async def homework(ctx):
         await fetcher.fetch_due_dates(channel_id=ctx.channel.id)
 
+    # Command to list the assignments for a specific class.
     @bot.command(pass_context=True)
     async def list(ctx, code=None):
         if code == None:
@@ -100,8 +101,6 @@ def main():
             final_assignments = assignments
         else:
             for assignment in assignments:
-             
-                print(vars(assignment))
                 if assignment.code == code:
                     final_assignments.append(assignment)
 
@@ -116,6 +115,8 @@ def main():
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
+
+    #
 
     # Command to debug Event Scheduling.
     # @bot.command(pass_context=True)
