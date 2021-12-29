@@ -101,7 +101,7 @@ def main():
         for assignment in assignments:
             if code == 'ALL' and (0 <= assignment.days_left <= 14):
                 final_assignments.append(assignment)
-            elif assignment.code == code or is_relevant:
+            elif (assignment.code == code or is_relevant) and (0 <= assignment.days_left <= 14):
                 final_assignments.append(assignment)
                 is_relevant = True
             else:
