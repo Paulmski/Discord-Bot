@@ -84,8 +84,6 @@ def main():
     async def homework(ctx):
         await fetcher.fetch_due_dates(channel_id=ctx.channel.id)
 
-
-
     @bot.command(pass_context=True)
     async def list(ctx, code=None):
         if code == None:
@@ -107,23 +105,13 @@ def main():
                 if assignment.code == code:
                     final_assignments.append(assignment)
 
-
-
-
-
         # No matching assignments found.
         if final_assignments == []:
             await ctx.channel.send('Could\'nt find any assignments matching the course code "{}".'.format(code))
             return
         title = "Assignments for {}".format(code)
         await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
-        
-
-
-
-
-
-
+ 
     # Print the message back.
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):

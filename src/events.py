@@ -81,11 +81,9 @@ channel_id=channel_id)
         print(due_dates_count)
         print(due_dates)
 
-
         current_course = ""
         for i, assignment in enumerate(due_dates):
             
-
             if current_course != "" and current_course != assignment.course_name:
                 embedded_message.add_field(name=f"__{current_course}__", value=course_assignments + "", inline=False)
                 course_assignments = ""
@@ -96,18 +94,14 @@ channel_id=channel_id)
             else:
                 course_assignments += self.format_assignment(assignment)
 
-
             if assignment.course_name != "":
                 current_course = assignment.course_name
-
-           
 
         # Add project information to bottom.
         embedded_message.add_field(name="", value="\nI am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
     
         # Send the message to the announcements channel.
         await channel.send(message, embed=embedded_message, delete_after=86400.0)
-
 
     def format_assignment(self, assignment: Assignment):
     # Parse the information from the assignment list.
@@ -174,7 +168,6 @@ class EventScheduler(commands.Cog):
                 await self.bot.http.request(route, json=event)
                 sleep(0.5) # Waiting 0.5 seconds to prevent API limiting.
             
-
     @schedule_events.before_loop
     async def before_scheduling(self):
         logging.debug("Initiating event scheduler.")
