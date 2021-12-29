@@ -40,12 +40,11 @@ class FetchDate(commands.Cog):
         final_assignments = []
         for i, assignment in enumerate(assignments):
             # Only assignments that are in the next 7 days will be shown.
-            if assignment.days_left <= 7 or assignment.days_left >= 0:
+            if 0 <= assignment.days_left <= 7:
                 final_assignments.append(assignment)
 
         # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
-        await self.announce_assignments(final_assignments, title="Due Dates For Today",
-channel_id=channel_id)
+        await self.announce_assignments(final_assignments, title="Due Dates For Today", channel_id=channel_id)
 
     @fetch_due_dates.before_loop
     async def before_fetch(self):
@@ -77,34 +76,29 @@ channel_id=channel_id)
         # For every course in the due date list...
         course_assignments = ""
         due_dates_count = len(due_dates) - 1
-        current_course = ""
+        current_course = due_dates[0].course_name
+        code = due_dates[0].code
 
         for i, assignment in enumerate(due_dates):
-
-            is_due_soon = assignment.days_left >= 0 and assignment.days_left <= 7
-            
-            # If the assignment is due soon, add it accordingly.
-            if is_due_soon:
-                # Preface with a new field if it is a new course.
-                if current_course != "" and current_course != assignment.course_name:
-                    embedded_message.add_field(name=f"__{current_course}__", value="", inline=False)
-                    course_assignments = ""
-                    course_assignments += self.format_assignment(assignment)
-
-                # Otherwise, if it is the last element...
-                elif i == due_dates_count:
-                    course_assignments += self.format_assignment(assignment)
-                    embedded_message.add_field(name=f"__{current_course}__", value=course_assignments + "", inline=False)
-                
-                # Otherwise, add the assignment list as normal.
-                else:
-                    course_assignments += self.format_assignment(assignment)
-
-            if assignment.course_name != "":
+            # Finish the course field if the course name has changed.
+            if assignment.course_name != current_course and assignment.course_name != "":
+                embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
+                course_assignments = ""
                 current_course = assignment.course_name
+                code = assignment.code
+                course_assignments += self.format_assignment(assignment)
+
+            # Finish the course field if it is the last Assignment element.
+            elif i == due_dates_count:
+                course_assignments += self.format_assignment(assignment)
+                embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
+                
+            # Otherwise, add the assignment to course_assignments as normal.
+            else:
+                course_assignments += self.format_assignment(assignment)
 
         # Add project information to bottom.
-        embedded_message.add_field(name="", value="\nI am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
+        embedded_message.add_field(name="\n\nAbout Me", value="I am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
     
         # Send the message to the announcements channel.
         await channel.send(message, embed=embedded_message, delete_after=86400.0)
