@@ -84,9 +84,9 @@ class Course():
             raise TypeError("Invalid day argument. Must be a string")
         self._room = room
     
-    # Set values based on arguments.
     def parse_state(self, row_data, indexes):
-
+        """Parses values from Google Sheet rows to set the object's state."""
+        
         parsed_data = parse_data(row_data, indexes)
         now = datetime.now()
 

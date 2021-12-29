@@ -50,8 +50,9 @@ class FetchDate(commands.Cog):
     async def before_fetch(self):
         logging.debug("Initiating data fetching.")
 
-    # Declare a function to send an announcement to a hard-coded channel number in .env.
     async def announce_assignments(self, due_dates, title: str, channel_id=None):
+        """Sends a Discord message with assignment due dates based on a Context channel or Announcements channel ID in .env."""
+
         # Preface with @everyone header.
         message = "@everyone"
 
@@ -104,7 +105,8 @@ class FetchDate(commands.Cog):
         await channel.send(message, embed=embedded_message, delete_after=86400.0)
 
     def format_assignment(self, assignment: Assignment):
-    # Parse the information from the assignment list.
+        """Formats an Assignment object to a string that will be displayed in a Discord Embed."""
+        # Parse the information from the assignment list.
         name = assignment.name
         due_date = assignment.due.strftime("%A, %B %d")
         days_left = assignment.days_left

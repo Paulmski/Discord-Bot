@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from classes.Assignment import Assignment
 from classes.Course import Course
 
-# Returns a dictionary containing assignment information.
 def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
+    """Uses the Google Sheet API to get every row in the Assignments workbook as a list."""
 
     # Use Google Sheets API to fetch due dates.
     sheet = service.spreadsheets()
@@ -46,9 +46,9 @@ def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
 
         return assignments
 
-# Returns JSON payloads to schedule events via HTTP.
 def fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET):
-
+    """Returns a list of JSON payloads used to schedule events via HTTP."""
+    
     courses = []
 
     # Use Google Sheets API to fetch due dates.
