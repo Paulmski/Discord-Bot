@@ -95,18 +95,23 @@ def main():
         code = code.upper().replace('-', '').replace(' ','')
         assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
         final_assignments = []
+        is_relevant = False
 
         # Remove all courses that don't have a matching course code and aren't within 14 days.
         for assignment in assignments:
             if code == 'ALL' and (0 <= assignment.days_left <= 14):
                 final_assignments.append(assignment)
-            elif assignment.code == code:
+            elif assignment.code == code or is_relevant:
                 final_assignments.append(assignment)
+                is_relevant = True
+            else:
+                is_relevant = False
 
         # No matching assignments found.
         if final_assignments == []:
             await ctx.channel.send('Couldn\'t find any assignments matching the course code "{}".'.format(code))
             return
+        
         title = "Assignments for {}".format(code)
         await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
  
