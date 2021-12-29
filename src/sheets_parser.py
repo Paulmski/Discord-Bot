@@ -9,8 +9,6 @@ from classes.Course import Course
 # Returns a dictionary containing assignment information.
 def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
 
-  
-
     # Use Google Sheets API to fetch due dates.
     sheet = service.spreadsheets()
     result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE_NAME).execute()
@@ -45,14 +43,11 @@ def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
             assignment.parse_state(row, index)
             if assignment.name != '':
                 assignments.append(assignment)
-          
 
         return assignments
 
 # Returns JSON payloads to schedule events via HTTP.
 def fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET):
-
-    
 
     courses = []
 
