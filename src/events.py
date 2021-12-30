@@ -43,8 +43,14 @@ class FetchDate(commands.Cog):
             if 0 <= assignment.days_left <= 7:
                 final_assignments.append(assignment)
 
-        # Make a call to the @everyone event handler with the assignments dictionary passed as an argument.
-        await self.announce_assignments(final_assignments, title="Due Dates For Today", channel_id=channel_id)
+        # Make a call to the @everyone event handler with the assignments array passed as an argument.
+        if final_assignments != []:
+            await self.announce_assignments(final_assignments, title="Due Dates For Today",
+channel_id=channel_id)
+        elif channel_id != None:
+            channel = self.bot.get_channel(channel_id)
+            await channel.send('Looks like there\'s no assignments in the next 7 days, you can relax... for now.')
+        
 
     @fetch_due_dates.before_loop
     async def before_fetch(self):
