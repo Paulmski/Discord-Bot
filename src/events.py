@@ -40,10 +40,10 @@ class FetchDate(commands.Cog):
         final_assignments = []
         for i, assignment in enumerate(assignments):
             # Only assignments that are in the next 7 days will be shown.
-            if assignment.days_left <= 7 or assignment.days_left >= 0:
+            if 0 <= assignment.days_left <= 7:
                 final_assignments.append(assignment)
 
-
+        # Make a call to the @everyone event handler with the assignments array passed as an argument.
         if final_assignments != []:
             await self.announce_assignments(final_assignments, title="Due Dates For Today",
 channel_id=channel_id)
@@ -56,8 +56,9 @@ channel_id=channel_id)
     async def before_fetch(self):
         logging.debug("Initiating data fetching.")
 
-    # Declare a function to send an announcement to a hard-coded channel number in .env.
     async def announce_assignments(self, due_dates, title: str, channel_id=None):
+        """Sends a Discord message with assignment due dates based on a Context channel or Announcements channel ID in .env."""
+
         # Preface with @everyone header.
         message = "@everyone"
 
@@ -79,45 +80,41 @@ channel_id=channel_id)
             logging.error("Unable to find channel to send announcement to.")
             return
           
-        # For every course in the due date dictionary...
-            
+        # For every course in the due date list...
         course_assignments = ""
-        due_dates_count = len(due_dates)-1
-        print(due_dates_count)
-        print(due_dates)
+        due_dates_count = len(due_dates) - 1
+        current_course = due_dates[0].course_name
+        code = due_dates[0].code
 
-
-        current_course = ""
         for i, assignment in enumerate(due_dates):
-            
-
-            if current_course != "" and current_course != assignment.course_name:
-                embedded_message.add_field(name=f"__{current_course}__", value=course_assignments + "", inline=False)
+            # Finish the course field if the course name has changed.
+            if assignment.course_name != current_course and assignment.course_name != "":
+                embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
                 course_assignments = ""
+                current_course = assignment.course_name
+                code = assignment.code
                 course_assignments += self.format_assignment(assignment)
+
+            # Finish the course field if it is the last Assignment element.
             elif i == due_dates_count:
                 course_assignments += self.format_assignment(assignment)
-                embedded_message.add_field(name=f"__{current_course}__", value=course_assignments + "", inline=False)
+                embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
+
+            # Otherwise, add the assignment to course_assignments as normal.
             else:
                 course_assignments += self.format_assignment(assignment)
 
-
-            if assignment.course_name != "":
-                current_course = assignment.course_name
-
-           
-
         # Add project information to bottom.
-        embedded_message.add_field(name="", value="\nI am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
+        embedded_message.add_field(name="\n\nAbout Me", value="I am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
     
         # Send the message to the announcements channel.
         await channel.send(message, embed=embedded_message, delete_after=86400.0)
 
-
     def format_assignment(self, assignment: Assignment):
-    # Parse the information from the assignment list.
+        """Formats an Assignment object to a string that will be displayed in a Discord Embed."""
+        # Parse the information from the assignment list.
         name = assignment.name
-        due_date = assignment.due.strftime("%B A%, %Y")
+        due_date = assignment.due.strftime("%A, %B %d")
         days_left = assignment.days_left
 
         # Change days_left to a different code block color depending on days left.
@@ -172,14 +169,10 @@ class EventScheduler(commands.Cog):
         current_day = now.strftime("%A") # Formatted for weekday's full name.
         for course in schedule:
             if course.day == current_day and course.start_time > now:
-                print(course.start_time)
-                print(now)
                 event = course.to_json_event()
-                print(event)
                 await self.bot.http.request(route, json=event)
                 sleep(0.5) # Waiting 0.5 seconds to prevent API limiting.
             
-
     @schedule_events.before_loop
     async def before_scheduling(self):
         logging.debug("Initiating event scheduler.")

@@ -15,6 +15,7 @@ def main():
     from time import sleep
     import logging
     import events as events
+    import elections
 
     random.seed() # Seed the RNG.
     load_dotenv()
@@ -84,59 +85,45 @@ def main():
     async def homework(ctx):
         await fetcher.fetch_due_dates(channel_id=ctx.channel.id)
 
-
-
+    # Command to list the assignments for a specific class.
     @bot.command(pass_context=True)
     async def list(ctx, code=None):
         if code == None:
             await ctx.channel.send('Invalid code entered, make sure you have the right course code e.g. "!list comp1271".')
             return
         
-        code = code.upper()
-
-
+        code = code.upper().replace('-', '').replace(' ','')
         assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
         final_assignments = []
-        # Remove all courses that don't have a matching course code
-        if code == 'ALL':
-            final_assignments = assignments
-        else:
-            for assignment in assignments:
-             
-                print(vars(assignment))
-                if assignment.code == code:
-                    final_assignments.append(assignment)
+        is_relevant = False
 
-
-
-
+        # Remove all courses that don't have a matching course code and aren't within 14 days.
+        for assignment in assignments:
+            if code == 'ALL' and (0 <= assignment.days_left <= 14):
+                final_assignments.append(assignment)
+            elif (assignment.code == code or is_relevant) and (0 <= assignment.days_left <= 14):
+                final_assignments.append(assignment)
+                is_relevant = True
+            else:
+                is_relevant = False
 
         # No matching assignments found.
         if final_assignments == []:
-            await ctx.channel.send('Could\'nt find any assignments matching the course code "{}".'.format(code))
+            await ctx.channel.send('Couldn\'t find any assignments matching the course code "{}".'.format(code))
             return
+        
         title = "Assignments for {}".format(code)
         await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
-        
-
-
-
-
-
-
+ 
     # Print the message back.
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
 
-    # Command to debug Event Scheduling.
-    # @bot.command(pass_context=True)
-    # async def schedule(ctx):
-    #     await scheduler.schedule_events()
-
     # Instantiate FetchDate and EventScheduler class.
     fetcher = events.FetchDate(service=service, bot=bot)
     scheduler = events.EventScheduler(service=service, bot=bot)
+    election = elections.ElectionSystem(bot=bot)
 
     # Run the bot using the DISCORD_TOKEN constant from .env.
     bot.run(DISCORD_TOKEN)

@@ -6,10 +6,8 @@ from datetime import datetime, timedelta
 from classes.Assignment import Assignment
 from classes.Course import Course
 
-# Returns a dictionary containing assignment information.
 def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
-
-  
+    """Uses the Google Sheet API to get every row in the Assignments workbook as a list."""
 
     # Use Google Sheets API to fetch due dates.
     sheet = service.spreadsheets()
@@ -36,7 +34,7 @@ def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
             "course_name": header.index("Course")
         }
 
-        # Declare assignments dictionary, will become an argument for announce_due_dates().
+        # Declare assignments list, will become an argument for announce_assignments() in events.py.
         assignments = []
 
         for row in values[1:]:
@@ -45,15 +43,12 @@ def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
             assignment.parse_state(row, index)
             if assignment.name != '':
                 assignments.append(assignment)
-          
 
         return assignments
 
-# Returns JSON payloads to schedule events via HTTP.
 def fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET):
-
+    """Returns a list of JSON payloads used to schedule events via HTTP."""
     
-
     courses = []
 
     # Use Google Sheets API to fetch due dates.
@@ -75,7 +70,6 @@ def fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET):
     }
 
     for row in values[1:]:
-
         course = Course()
         course.parse_state(row, index)
         courses.append(course)

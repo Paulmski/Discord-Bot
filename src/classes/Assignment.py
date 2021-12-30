@@ -67,8 +67,6 @@ class Assignment():
             raise TypeError("Invalid note argument. Must be a string")
         self._note = note
 
-
-
     @property
     def course_name(self):
         return self._course_name
@@ -78,12 +76,10 @@ class Assignment():
         if not isinstance(course_name, str):
             raise TypeError("Invalid course_name argument. Must be a string")
         self._course_name = course_name
-    
             
-    # Parse values from Sheets row_data to set the state.
     def parse_state(self, row_data, indexes):
-
-
+        """Parses values from Google Sheet rows to set the object's state."""
+        
         parsed_data = parse_data(row_data, indexes)
 
         # If due_date from the parsed_data is empty, it's must be an empty row.
