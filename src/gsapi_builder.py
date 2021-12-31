@@ -9,9 +9,10 @@ import os
 # Enforcing read only scope for Google Sheets API.
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 
-# Establish a connection to the Google Sheets API.
 # The file token.json stores the user's access and refresh tokens, and is created automatically when the authorization flow completes for the first time.
-def build_service():   
+def build_service():
+    """Establishes a connection to the Google Sheets API using a Quickstart."""
+
     creds = None
     if os.path.exists('token.json'):
         creds = Credentials.from_authorized_user_file('token.json', SCOPES)
