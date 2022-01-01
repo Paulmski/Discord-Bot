@@ -17,6 +17,7 @@ def main():
     import events as events
     import elections
 
+
     random.seed() # Seed the RNG.
     load_dotenv()
 
@@ -27,6 +28,7 @@ def main():
     DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
     ANNOUNCEMENT_CHANNEL = os.getenv("ANNOUNCEMENT_CHANNEL")
     GUILD_ID = int(os.getenv("GUILD_ID"))
+
 
     # Logging formating to view time stamps and level of log information
     logging.basicConfig(
@@ -51,6 +53,7 @@ def main():
     @bot.event
     async def on_connect():
         logging.info("--Connected to server--")
+
 
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
