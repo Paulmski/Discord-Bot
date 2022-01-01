@@ -1,10 +1,14 @@
 from classes.User import User
 
+
+
+# Class to represent Discord study groups
 class Group():
-    def __init__(self, ID=0, name="", owner=User()):
+    def __init__(self, ID=0, name="", owner=User(), members=[User]):
         self.ID = ID
         self.name = name
         self.owner = owner
+        self.members = members
         
 
     @property
@@ -39,4 +43,14 @@ class Group():
         if not isinstance(value, User):
             raise ValueError("Invalid owner must be a User not type: %s" % type(value))
         self._owner = value
+        
+    @property
+    def members(self):
+        return self._members
+    
+    @members.setter
+    def members(self, value):
+        if not isinstance(value, [User]):
+            raise ValueError("Invalid members must be a [User] not type: %s" % type(value))
+        self._members = value
 
