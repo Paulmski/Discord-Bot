@@ -1,7 +1,10 @@
-class User():
-    def __init__(self, ID=0, name=""):
+from classes.User import User
+
+class Group():
+    def __init__(self, ID=0, name="", owner=User()):
         self.ID = ID
         self.name = name
+        self.owner = owner
         
 
     @property
@@ -25,3 +28,15 @@ class User():
         if not isinstance(value, int):
             raise ValueError("Invalid ID must be a int not type: %s" % type(value))
         self._ID = value
+        
+        
+    @property
+    def owner(self):
+        return self._owner
+    
+    @owner.setter
+    def owner(self, value):
+        if not isinstance(value, User):
+            raise ValueError("Invalid owner must be a User not type: %s" % type(value))
+        self._owner = value
+
