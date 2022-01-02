@@ -76,6 +76,7 @@ Specify the current semester's book followed by the range of cells in which the 
 
 With the addition of Scheduled Events, please also define the `COURSE_SHEET` range for the workbook containing course information. Specify the range of cells where `Course Name, Day, Time, Ends, and Room` are contained.
 
+
 Example:
 ```python
 SPREADSHEET_ID = "t0t@llyr3@lspr3@dsh33t!d"
