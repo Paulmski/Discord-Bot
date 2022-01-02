@@ -179,6 +179,32 @@ def main():
             await voice_channel.delete()
             
             
+        # Add a new user to the study group.
+        elif args[0] == 'add':
+            channel_name = args[1].lower()
+            
+            text_channel = discord.utils.get(ctx.guild.text_channels, name=channel_name)
+            voice_channel = discord.utils.get(ctx.guild.voice_channels, name=channel_name)
+            if text_channel is None or voice_channel is None:
+                await ctx.send('Sorry, that study group doesn\'t exist!')
+                return
+            
+            overwrite = text_channel.overwrites_for(ctx.author)
+            if overwrite.read_messages == False:
+                await ctx.send('Sorry, you don\'t have permissions to add a new member to this study group')
+                return
+            # Give permissions for all mentioned members.
+            for member in ctx.message.mentions:
+                await text_channel.set_permissions(member, read_messages=True)
+                await voice_channel.set_permissions(member, read_messages=True)
+            
+                
+                
+
+
+            
+            
+            
             
             
             
