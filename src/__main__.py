@@ -134,20 +134,31 @@ def main():
                 if channel.name == group_name:
                     await ctx.send('Sorry, that study group name already exists!')
                     return
-        
                 
+            # Create study group category if it doesn't exist'
+            study_category = None
+            for category in ctx.guild.categories:
+                if category.name == 'study-groups':
+                    study_category = category
+            if study_category is None:
+                study_category = await ctx.guild.create_category('study-groups')
+                    
             # Create new channel
-            channel = await ctx.guild.create_text_channel(group_name)
+            channel = await ctx.guild.create_text_channel(group_name, category=study_category)
+            voice_channel = await ctx.guild.create_voice_channel(group_name, category=study_category)
             # Set channel so that @everyone cannot see it.
             await channel.set_permissions(ctx.guild.default_role, read_messages=False)
+            await voice_channel.set_permissions(ctx.guild.default_role, read_messages=False)
             
             
             for member in ctx.message.mentions:
                 # Allow mentioned user to view channel.
                 await channel.set_permissions(member, read_messages=True)
+                await voice_channel.set_permissions(member, read_messages=True)
                 
             
             await channel.set_permissions(ctx.author, read_messages=True)
+            await voice_channel.set_permissions(ctx.author, read_messages=True)
             
             
     # Print the message back.
