@@ -16,7 +16,6 @@ def main():
     import events as events
     import elections
 
-
     random.seed() # Seed the RNG.
     load_dotenv()
 
