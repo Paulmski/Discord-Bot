@@ -1,7 +1,6 @@
 # file app/__main__.py
 
 def main():
-
     from discord.ext.commands import Bot
     from discord.ext import tasks, commands
     import discord.utils
@@ -117,7 +116,40 @@ def main():
         
         title = "Assignments for {}".format(code)
         await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
- 
+        
+        
+        
+        
+        
+    @bot.command(pass_context=True)
+    async def group(ctx, *args):
+        
+        if args[0] == 'create':
+            if args[1] is None or '@' in args[1]: 
+                await ctx.send('Sorry, invalid group name.')
+                return
+            group_name = args[1].lower()
+            # Check if a study group with the same name already exists.
+            for channel in ctx.guild.text_channels:
+                if channel.name == group_name:
+                    await ctx.send('Sorry, that study group name already exists!')
+                    return
+        
+                
+            # Create new channel
+            channel = await ctx.guild.create_text_channel(group_name)
+            # Set channel so that @everyone cannot see it.
+            await channel.set_permissions(ctx.guild.default_role, read_messages=False)
+            
+            
+            for member in ctx.message.mentions:
+                # Allow mentioned user to view channel.
+                await channel.set_permissions(member, read_messages=True)
+                
+            
+            await channel.set_permissions(ctx.author, read_messages=True)
+            
+            
     # Print the message back.
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
