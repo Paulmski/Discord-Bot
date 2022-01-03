@@ -65,17 +65,6 @@ def main():
         elif rand % 2 == 1:
             await ctx.channel.send('Tails!')
 
-    # Command to make an announcement to whole server, but in a specific channel.
-    @bot.command(pass_context=True)
-    async def announce(ctx, subCommand: str, subSubCommand: str, arg: str):
-        # Used to configure settings related to this command.
-        if (subCommand == 'config'):
-            # Used to configure which channel the bot should make announcements too.
-            if (subSubCommand == 'channel'):
-                # TODO: Allow for the ability to modify channel for announcement.
-                channel = discord.utils.get(ctx.guild.channels, name=arg)
-                await channel.send('This is the new announcement channel.')
-
     # Command to to fetch due dates on demand.
     @bot.command(pass_context=True)
     async def homework(ctx):
