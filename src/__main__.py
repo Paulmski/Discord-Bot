@@ -52,7 +52,6 @@ def main():
     async def on_connect():
         logging.info("--Connected to server--")
 
-
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
     async def coinflip(ctx):
@@ -116,13 +115,10 @@ def main():
         title = "Assignments for {}".format(code)
         await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
         
-        
-        
-        
-        
     @bot.command(pass_context=True)
     async def group(ctx, *args):
         
+        # Command to create a study group.
         if args[0] == 'create':
             if args[1] is None or '@' in args[1]: 
                 await ctx.send('Sorry, invalid group name.')
@@ -134,7 +130,7 @@ def main():
                     await ctx.send('Sorry, that study group name already exists!')
                     return
                 
-            # Create study group category if it doesn't exist'
+            # Create study group category if it doesn't exist.
             study_category = None
             for category in ctx.guild.categories:
                 if category.name == 'study-groups':
@@ -142,53 +138,56 @@ def main():
             if study_category is None:
                 study_category = await ctx.guild.create_category('study-groups')
                     
-            # Create new channel
+            # Create the new text and voice channels.
             text_channel = await ctx.guild.create_text_channel(group_name, category=study_category)
             voice_channel = await ctx.guild.create_voice_channel(group_name, category=study_category)
+            
             # Set channel so that @everyone cannot see it.
             await text_channel.set_permissions(ctx.guild.default_role, read_messages=False)
             await voice_channel.set_permissions(ctx.guild.default_role, read_messages=False)
-            
             
             for member in ctx.message.mentions:
                 # Allow mentioned user to view channel.
                 await text_channel.set_permissions(member, read_messages=True)
                 await voice_channel.set_permissions(member, read_messages=True)
                 
-            
             await text_channel.set_permissions(ctx.author, read_messages=True)
             await voice_channel.set_permissions(ctx.author, read_messages=True)
-            
             
         # Command to delete a study group text and voice channel.
         # Requires that the author already has read permissions for the channel.
         elif args[0] == 'delete': 
+
             channel_name = args[1].lower()
             text_channel = discord.utils.get(ctx.guild.text_channels, name=channel_name)
-            # Check if text_channel exists
+
+            # Check if text_channel exists.
             if text_channel is None:
                 await ctx.send('Sorry, that study group doesn\'t exist!')
                 return
+
+            # Check if permissions are valid.
             overwrite = text_channel.overwrites_for(ctx.author)
             if overwrite.read_messages == False:
-                await ctx.send('Sorry, you don\'t have permissions to delete this study group')
+                await ctx.send('Sorry, you don\'t have permissions to delete this study group.')
                 return
             await text_channel.delete()
             
             voice_channel = discord.utils.get(ctx.guild.voice_channels, name=channel_name)
             await voice_channel.delete()
             
-            
-        # Add a new user to the study group.
+        # Add a new user to an already existing study group.
         elif args[0] == 'add':
+
             channel_name = args[1].lower()
-            
             text_channel = discord.utils.get(ctx.guild.text_channels, name=channel_name)
             voice_channel = discord.utils.get(ctx.guild.voice_channels, name=channel_name)
+
             if text_channel is None or voice_channel is None:
                 await ctx.send('Sorry, that study group doesn\'t exist!')
                 return
             
+            # Check if author has permission to add a new member.
             overwrite = text_channel.overwrites_for(ctx.author)
             if overwrite.read_messages == False:
                 await ctx.send('Sorry, you don\'t have permissions to add a new member to this study group')
@@ -197,9 +196,7 @@ def main():
             for member in ctx.message.mentions:
                 await text_channel.set_permissions(member, read_messages=True)
                 await voice_channel.set_permissions(member, read_messages=True)
-            
-                
-                        
+                         
     # Print the message back.
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
