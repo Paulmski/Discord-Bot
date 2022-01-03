@@ -199,15 +199,7 @@ def main():
                 await voice_channel.set_permissions(member, read_messages=True)
             
                 
-                
-
-
-            
-            
-            
-            
-            
-            
+                        
     # Print the message back.
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
