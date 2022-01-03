@@ -45,8 +45,7 @@ class FetchDate(commands.Cog):
 
         # Make a call to the @everyone event handler with the assignments array passed as an argument.
         if final_assignments != []:
-            await self.announce_assignments(final_assignments, title="Due Dates For Today",
-channel_id=channel_id)
+            await self.announce_assignments(final_assignments, title="Due Dates For Today", channel_id=channel_id)
         elif channel_id != None:
             channel = self.bot.get_channel(channel_id)
             await channel.send('Looks like there\'s no assignments in the next 7 days, you can relax... for now.')
@@ -87,21 +86,26 @@ channel_id=channel_id)
         code = due_dates[0].code
 
         for i, assignment in enumerate(due_dates):
+
+            is_due_soon = 0 <= assignment.days_left <= 7
+
             # Finish the course field if the course name has changed.
             if assignment.course_name != current_course and assignment.course_name != "":
                 embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
                 course_assignments = ""
                 current_course = assignment.course_name
                 code = assignment.code
-                course_assignments += self.format_assignment(assignment)
+                if is_due_soon:
+                    course_assignments += self.format_assignment(assignment)
 
             # Finish the course field if it is the last Assignment element.
             elif i == due_dates_count:
-                course_assignments += self.format_assignment(assignment)
-                embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
+                if is_due_soon:
+                    course_assignments += self.format_assignment(assignment)
+                    embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
 
             # Otherwise, add the assignment to course_assignments as normal.
-            else:
+            elif is_due_soon:
                 course_assignments += self.format_assignment(assignment)
 
         # Add project information to bottom.
@@ -142,12 +146,10 @@ class EventScheduler(commands.Cog):
         self.schedule_events.start()
         self.purge_study_groups.start()
 
-
     # Declare a function to unload the schedule_events task.
     def cog_unload(self):
         self.schedule_events.cancel()
         self.purge_study_groups.cancel()
-
 
     # Declare the schedule_events loop, which fully executes every 24 hours.
     @tasks.loop(minutes=60.0)
@@ -177,15 +179,16 @@ class EventScheduler(commands.Cog):
                 await self.bot.http.request(route, json=event)
                 sleep(0.5) # Waiting 0.5 seconds to prevent API limiting.
                 
-                
-                
     @tasks.loop(minutes=1)
     async def purge_study_groups(self):
+
         guild = self.bot.get_guild(int(GUILD_ID))
         if guild is None: return
+
         for channel in guild.text_channels:
             if channel.category is None: continue
             if channel.category.name != 'study-groups': continue
+
             # Get the most recent message from channel if there is a message.
             messages = await channel.history(limit=1).flatten()
             last_message = None
@@ -194,21 +197,19 @@ class EventScheduler(commands.Cog):
 
             if last_message is None: continue
             
-            
-            
-            if (datetime.now() - last_message.created_at).total_seconds() > 13 * 24 * 60 *60:
+            if (datetime.now() - last_message.created_at).total_seconds() > 13 * 24 * 60 * 60:
                 channel.send_message('@everyone\nThis channel will be deleted if it is inactive for 1 more day.')
                 
-            if (datetime.now() - last_message.created_at).total_seconds() > 14 * 23 * 60 *60:
+            if (datetime.now() - last_message.created_at).total_seconds() > 14 * 23 * 60 * 60:
                 channel.send_message('@everyone\nThis channel will be deleted if it is inactive for 1 more hour.')
                 
-            # Inactive for 14 days now deleting study group
+            # Study group inactive for 14 days will be deleted.
             if (datetime.now() - last_message.created_at).total_seconds() > 14 * 24 * 60 *60:
                 voice_channel = discord.utils.get(guild.voice_channels, name=channel.name)
                 await voice_channel.delete()
                 await channel.delete()
-
-            
+                logging.info(f'Study group {channel.name} was removed due to inactivity.')
+  
     @schedule_events.before_loop
     async def before_scheduling(self):
         logging.debug("Initiating event scheduler.")
