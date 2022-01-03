@@ -1,8 +1,10 @@
+
+
+# Class to represent a user stored in database
 class User():
-    def __init__(self, ID, name, owner):
+    def __init__(self, ID=0, name=""):
         self.ID = ID
         self.name = name
-        self.owner = owner
         
 
     @property
@@ -16,7 +18,7 @@ class User():
         self._name = value
         
     
-    
+    # The ID must be the UUID of the user
     @property()
     def ID(self):
         return self._ID
