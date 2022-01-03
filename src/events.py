@@ -188,7 +188,7 @@ class EventScheduler(commands.Cog):
         for channel in guild.text_channels:
             if channel.category is None: continue
             if channel.category.name != 'study-groups': continue
-            
+
             # Get the most recent message from channel if there is a message.
             messages = await channel.history(limit=1).flatten()
             last_message = None

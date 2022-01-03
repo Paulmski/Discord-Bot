@@ -23,7 +23,6 @@ def main():
     ANNOUNCEMENT_CHANNEL = os.getenv("ANNOUNCEMENT_CHANNEL")
     GUILD_ID = int(os.getenv("GUILD_ID"))
 
-
     # Logging formating to view time stamps and level of log information
     logging.basicConfig(
          format='%(asctime)s %(levelname)-8s %(message)s',
@@ -85,6 +84,7 @@ def main():
     # Command to list the assignments for a specific class.
     @bot.command(pass_context=True)
     async def list(ctx, code=None):
+
         if code == None:
             await ctx.channel.send('Invalid code entered, make sure you have the right course code e.g. "!list comp1271".')
             return
@@ -111,7 +111,8 @@ def main():
         
         title = "Assignments for {}".format(code)
         await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
-        
+    
+    # Command to create, modify permissions for, or delete private study groups.
     @bot.command(pass_context=True)
     async def group(ctx, *args):
         
@@ -121,6 +122,7 @@ def main():
                 await ctx.send('Sorry, invalid group name.')
                 return
             group_name = args[1].lower()
+
             # Check if a study group with the same name already exists.
             for text_channel in ctx.guild.text_channels:
                 if text_channel.name == group_name:
@@ -168,8 +170,9 @@ def main():
             if overwrite.read_messages == False:
                 await ctx.send('Sorry, you don\'t have permissions to delete this study group.')
                 return
+
+            # Delete the text and voice channel.
             await text_channel.delete()
-            
             voice_channel = discord.utils.get(ctx.guild.voice_channels, name=channel_name)
             await voice_channel.delete()
             
@@ -189,6 +192,7 @@ def main():
             if overwrite.read_messages == False:
                 await ctx.send('Sorry, you don\'t have permissions to add a new member to this study group')
                 return
+
             # Give permissions for all mentioned members.
             for member in ctx.message.mentions:
                 await text_channel.set_permissions(member, read_messages=True)
