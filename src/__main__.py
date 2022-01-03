@@ -80,6 +80,7 @@ def main():
     @bot.command(pass_context=True)
     async def homework(ctx):
         await fetcher.fetch_due_dates(channel_id=ctx.channel.id)
+        logging.info(f'User {ctx.author} requested homework.')
 
     # Command to list the assignments for a specific class.
     @bot.command(pass_context=True)
@@ -111,6 +112,7 @@ def main():
         
         title = "Assignments for {}".format(code)
         await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
+        logging.info(f'User {ctx.author} request assignment for {code}.')
     
     # Command to create, modify permissions for, or delete private study groups.
     @bot.command(pass_context=True)
@@ -152,6 +154,8 @@ def main():
                 
             await text_channel.set_permissions(ctx.author, read_messages=True)
             await voice_channel.set_permissions(ctx.author, read_messages=True)
+
+            logging.info(f'User {ctx.author} successfully created private study group "{group_name}".')
             
         # Command to delete a study group text and voice channel.
         # Requires that the author already has read permissions for the channel.
@@ -175,6 +179,8 @@ def main():
             await text_channel.delete()
             voice_channel = discord.utils.get(ctx.guild.voice_channels, name=channel_name)
             await voice_channel.delete()
+
+            logging.info(f'User {ctx.author} successfully deleted private study group "{channel_name}".')
             
         # Add a new user to an already existing study group.
         elif args[0] == 'add':
@@ -197,6 +203,8 @@ def main():
             for member in ctx.message.mentions:
                 await text_channel.set_permissions(member, read_messages=True)
                 await voice_channel.set_permissions(member, read_messages=True)
+
+            logging.info(f'User {ctx.author} added members to private study group "{channel_name}": {[x.name for x in ctx.message.mentions]}')
                          
     # Print the message back.
     @bot.command(pass_context=True)
