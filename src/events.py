@@ -27,7 +27,7 @@ class FetchDate(commands.Cog):
     # Declare a function to unload the fetch_due_date task.
     def cog_unload(self):
         self.fetch_due_dates.cancel()
-
+              
     # Declare the fetch_due_dates loop. Loop will fully execute every 24 hours.
     @tasks.loop(minutes=60.0)
     async def fetch_due_dates(self, channel_id=None):
@@ -140,10 +140,14 @@ class EventScheduler(commands.Cog):
         self.service = service
         self.bot = bot
         self.schedule_events.start()
+        self.purge_study_groups.start()
+
 
     # Declare a function to unload the schedule_events task.
     def cog_unload(self):
         self.schedule_events.cancel()
+        self.purge_study_groups.cancel()
+
 
     # Declare the schedule_events loop, which fully executes every 24 hours.
     @tasks.loop(minutes=60.0)
@@ -172,6 +176,25 @@ class EventScheduler(commands.Cog):
                 event = course.to_json_event()
                 await self.bot.http.request(route, json=event)
                 sleep(0.5) # Waiting 0.5 seconds to prevent API limiting.
+    @tasks.loop(minutes=0.10)
+    async def purge_study_groups(self):
+        guild = self.bot.get_guild(int(GUILD_ID))
+        if guild is None: return
+        for channel in guild.text_channels:
+            if channel.category is None: continue
+            if channel.category.name != 'study-groups': continue
+            # Get the most recent message from channel if there is a message.
+            messages = await channel.history(limit=1).flatten()
+            last_message = None
+            if len(messages) == 1:
+                last_message = messages[0]
+
+            if last_message is None: continue
+            if (datetime.now() - last_message.created_at).total_seconds() > 14 * 24 * 60 *60:
+                voice_channel = discord.utils.get(guild.voice_channels, name=channel.name)
+                await voice_channel.delete()
+                await channel.delete()
+
             
     @schedule_events.before_loop
     async def before_scheduling(self):
