@@ -45,8 +45,7 @@ class FetchDate(commands.Cog):
 
         # Make a call to the @everyone event handler with the assignments array passed as an argument.
         if final_assignments != []:
-            await self.announce_assignments(final_assignments, title="Due Dates For Today",
-channel_id=channel_id)
+            await self.announce_assignments(final_assignments, title="Due Dates For Today", channel_id=channel_id)
         elif channel_id != None:
             channel = self.bot.get_channel(channel_id)
             await channel.send('Looks like there\'s no assignments in the next 7 days, you can relax... for now.')
@@ -87,21 +86,26 @@ channel_id=channel_id)
         code = due_dates[0].code
 
         for i, assignment in enumerate(due_dates):
+
+            is_due_soon = 0 <= assignment.days_left <= 7
+
             # Finish the course field if the course name has changed.
             if assignment.course_name != current_course and assignment.course_name != "":
                 embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
                 course_assignments = ""
                 current_course = assignment.course_name
                 code = assignment.code
-                course_assignments += self.format_assignment(assignment)
+                if is_due_soon:
+                    course_assignments += self.format_assignment(assignment)
 
             # Finish the course field if it is the last Assignment element.
             elif i == due_dates_count:
-                course_assignments += self.format_assignment(assignment)
+                if is_due_soon:
+                    course_assignments += self.format_assignment(assignment)
                 embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
 
             # Otherwise, add the assignment to course_assignments as normal.
-            else:
+            elif is_due_soon:
                 course_assignments += self.format_assignment(assignment)
 
         # Add project information to bottom.
@@ -147,7 +151,6 @@ class EventScheduler(commands.Cog):
     def cog_unload(self):
         self.schedule_events.cancel()
         self.purge_study_groups.cancel()
-
 
     # Declare the schedule_events loop, which fully executes every 24 hours.
     @tasks.loop(minutes=60.0)

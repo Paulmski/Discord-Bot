@@ -100,9 +100,9 @@ def main():
 
         # Remove all courses that don't have a matching course code and aren't within 14 days.
         for assignment in assignments:
-            if code == 'ALL' and (0 <= assignment.days_left <= 14):
+            if code == 'ALL' or assignment.name != "":
                 final_assignments.append(assignment)
-            elif (assignment.code == code or is_relevant) and (0 <= assignment.days_left <= 14):
+            elif assignment.code == code or is_relevant:
                 final_assignments.append(assignment)
                 is_relevant = True
             else:
