@@ -121,7 +121,7 @@ def main():
             if args[1] is None or '@' in args[1]: 
                 await ctx.send('Sorry, invalid group name.')
                 return
-            group_name = args[1].lower()
+            group_name = args[1].lower().replace(' ', '-')
 
             # Check if a study group with the same name already exists.
             for text_channel in ctx.guild.text_channels:
