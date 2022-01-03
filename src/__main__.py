@@ -43,14 +43,15 @@ def main():
     # Print the bot information upon bootup.
     @bot.event
     async def on_ready():
-        logging.info('\nLogged in as\n' + bot.user.name)
+        logging.info('Logged In')
+        logging.info('Username: ' + bot.user.name)
         logging.debug(bot.user.id)
-        print('------')
+        logging.info('== Connection Successful ==')
 
     # Print that the bot is connected to the server.
     @bot.event
     async def on_connect():
-        logging.info("--Connected to server--")
+        logging.info("=== Connecting To Server ===")
 
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
@@ -141,7 +142,7 @@ def main():
             # Create the new text and voice channels.
             text_channel = await ctx.guild.create_text_channel(group_name, category=study_category)
             voice_channel = await ctx.guild.create_voice_channel(group_name, category=study_category)
-            
+
             # Set channel so that @everyone cannot see it.
             await text_channel.set_permissions(ctx.guild.default_role, read_messages=False)
             await voice_channel.set_permissions(ctx.guild.default_role, read_messages=False)
