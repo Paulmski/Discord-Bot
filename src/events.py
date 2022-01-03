@@ -176,7 +176,10 @@ class EventScheduler(commands.Cog):
                 event = course.to_json_event()
                 await self.bot.http.request(route, json=event)
                 sleep(0.5) # Waiting 0.5 seconds to prevent API limiting.
-    @tasks.loop(minutes=0.10)
+                
+                
+                
+    @tasks.loop(minutes=1)
     async def purge_study_groups(self):
         guild = self.bot.get_guild(int(GUILD_ID))
         if guild is None: return
@@ -190,6 +193,16 @@ class EventScheduler(commands.Cog):
                 last_message = messages[0]
 
             if last_message is None: continue
+            
+            
+            
+            if (datetime.now() - last_message.created_at).total_seconds() > 13 * 24 * 60 *60:
+                channel.send_message('@everyone\nThis channel will be deleted if it is inactive for 1 more day.')
+                
+            if (datetime.now() - last_message.created_at).total_seconds() > 14 * 23 * 60 *60:
+                channel.send_message('@everyone\nThis channel will be deleted if it is inactive for 1 more hour.')
+                
+            # Inactive for 14 days now deleting study group
             if (datetime.now() - last_message.created_at).total_seconds() > 14 * 24 * 60 *60:
                 voice_channel = discord.utils.get(guild.voice_channels, name=channel.name)
                 await voice_channel.delete()
