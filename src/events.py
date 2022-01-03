@@ -203,11 +203,12 @@ class EventScheduler(commands.Cog):
             if (datetime.now() - last_message.created_at).total_seconds() > 14 * 23 * 60 * 60:
                 channel.send_message('@everyone\nThis channel will be deleted if it is inactive for 1 more hour.')
                 
-            # Inactive for 14 days now deleting study group
+            # Study group inactive for 14 days will be deleted.
             if (datetime.now() - last_message.created_at).total_seconds() > 14 * 24 * 60 *60:
                 voice_channel = discord.utils.get(guild.voice_channels, name=channel.name)
                 await voice_channel.delete()
                 await channel.delete()
+                logging.info(f'Study group {channel.name} was removed due to inactivity.')
   
     @schedule_events.before_loop
     async def before_scheduling(self):
