@@ -4,14 +4,23 @@
 
 def main():
     from discord.ext.commands import Bot
+    from discord.ext import tasks, commands
+    import discord.utils
+    from discord.http import Route
     import random
-    import secrets
-    import urllib.request
+    import os
+    from dotenv import load_dotenv
+    import gsapi_builder
+    import sheets_parser
+    from datetime import datetime
+    from time import sleep
+    import logging
+    import events as events
+    import elections
+    import urllib
     import re
 
-<<<<<<< HEAD
 
-=======
     random.seed() # Seed the RNG.
     load_dotenv()
 
@@ -34,7 +43,6 @@ def main():
     service = gsapi_builder.build_service()
 
     # Instantiate the bot, with the ! prefix preferred.
->>>>>>> b0b441093059e636aad1d9ca942bb640f2eba191
     bot = Bot(command_prefix='!')
 
 
@@ -60,10 +68,9 @@ def main():
         elif rand == 1:
             await ctx.channel.send('Tails!')
 
-<<<<<<< HEAD
     # print message back
     @bot.command()
-=======
+
     # Command to make an announcement to whole server, but in a specific channel.
     @bot.command(pass_context=True)
     async def announce(ctx, subCommand: str, subSubCommand: str, arg: str):
@@ -191,32 +198,12 @@ def main():
             for member in ctx.message.mentions:
                 await text_channel.set_permissions(member, read_messages=True)
                 await voice_channel.set_permissions(member, read_messages=True)
-            
-                
-                
-
-
-            
-            
-            
-            
-            
-            
+                       
     # Print the message back.
     @bot.command(pass_context=True)
->>>>>>> b0b441093059e636aad1d9ca942bb640f2eba191
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
 
-
-       #Coin Flip function
-    @bot.command(pass_context=True)
-    async def coinflip(ctx):
-        rand = random.choice([0,1])
-        if rand == 0:
-            await ctx.channel.send('Heads!')
-        elif rand == 1:
-            await ctx.channel.send('Tails!')
 
     @bot.command(pass_context=True)
     async def search(ctx, *, arg):
