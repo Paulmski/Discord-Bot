@@ -15,6 +15,8 @@ def main():
     import logging
     import events as events
     import elections
+    import urllib
+    import re
 
     random.seed() # Seed the RNG.
     load_dotenv()
@@ -198,12 +200,20 @@ def main():
                 await text_channel.set_permissions(member, read_messages=True)
                 await voice_channel.set_permissions(member, read_messages=True)
             
-                
+
                         
     # Print the message back.
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
+
+    # Youtube search command
+    @bot.command(pass_context=True)
+    async def search(ctx, *, arg):
+        html = urllib.request.urlopen("https://www.youtube.com/results?search_query={}".format(arg))
+        video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
+        await ctx.channel.send("https://www.youtube.com/watch?v=" + video_ids[0])    
+        
 
     # Instantiate FetchDate and EventScheduler class.
     fetcher = events.FetchDate(service=service, bot=bot)
