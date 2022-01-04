@@ -42,7 +42,7 @@ class Course():
     def day(self, day):
         if not isinstance(day, str):
             raise TypeError("Invalid day argument. Must be a string")
-        self._room = day
+        self._day = day
 
     @property
     def description(self):
@@ -52,7 +52,7 @@ class Course():
     def description(self, description):
         if not isinstance(description, str):
             raise TypeError("Invalid description argument. Must be a string")
-        self._room = description
+        self._description = description
         
     @property
     def start_time(self):
@@ -81,7 +81,7 @@ class Course():
     @room.setter
     def room(self, room):
         if not isinstance(room, str):
-            raise TypeError("Invalid day argument. Must be a string")
+            raise TypeError("Invalid room argument. Must be a string")
         self._room = room
     
     def parse_state(self, row_data, indexes):
