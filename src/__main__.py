@@ -75,10 +75,16 @@ def main():
     @bot.command(pass_context=True)
     async def list(ctx, code=None):
 
+
+
+
         if code == None:
             await ctx.channel.send('Invalid code entered, make sure you have the right course code e.g. "!list comp1271".')
             return
-        
+        if SPREADSHEET_ID is None or RANGE_NAME is None:
+            await ctx.channel.send('Internal error, no spreadsheet or range specified.')
+            logging.warning('No SPREADSHEET_ID or RANGE_NAME specified in .env.')
+            return
         code = code.upper().replace('-', '').replace(' ','')
         assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
         final_assignments = []
@@ -200,9 +206,13 @@ def main():
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
 
-    # Instantiate FetchDate and EventScheduler class.
-    fetcher = events.FetchDate(service=service, bot=bot)
-    scheduler = events.EventScheduler(service=service, bot=bot)
+
+    if SPREADSHEET_ID is not None and RANGE_NAME is not None:
+        # Instantiate FetchDate and EventScheduler class.
+        fetcher = events.FetchDate(service=service, bot=bot)
+        scheduler = events.EventScheduler(service=service, bot=bot)
+    else:
+        logging.warning('No SPREADSHEET_ID or RANGE_NAME specified in .env.')
 
     # Run the bot using the DISCORD_TOKEN constant from .env.
     bot.run(DISCORD_TOKEN)
