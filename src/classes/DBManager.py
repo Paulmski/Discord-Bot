@@ -26,9 +26,3 @@ class Databases(object):
                     cursor.execute(create_db_query)
         except Error as e:
             print(e)
-
-    
-
-
-
-

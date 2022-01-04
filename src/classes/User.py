@@ -1,11 +1,8 @@
-
-
 # Class to represent a user stored in database
 class User():
     def __init__(self, ID=0, name=""):
         self.ID = ID
         self.name = name
-        
 
     @property
     def name(self):
@@ -17,7 +14,6 @@ class User():
             raise ValueError("Invalid name must be a string not type: %s" % type(value))
         self._name = value
         
-    
     # The ID must be the UUID of the user
     @property()
     def ID(self):

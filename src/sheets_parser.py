@@ -18,7 +18,7 @@ def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
     if not values:
         logging.warning("No data found.")
 
-    # Otherwise, create and return a dictionary containing assignment information.
+    # Otherwise, create and return a list containing assignment information.
     else:
 
         header = values[0] # Header row with column names (A1:E1)
@@ -38,9 +38,9 @@ def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
         assignments = []
 
         for row in values[1:]:
-            # This means the row is missing a title and should be skipped (it is probably missing other key information).
             assignment = Assignment()
             assignment.parse_state(row, index)
+            # If the assignment doesn't have a name, it's not a valid entry.
             if assignment.name != '':
                 assignments.append(assignment)
 

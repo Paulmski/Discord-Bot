@@ -2,9 +2,9 @@
 This template will help you format the changes made in your pull request. Use the headings and examples as a guideline for your PR content. Once finished, delete all non-level 3 headings and their text, and format your final draft accordingly.
 
 **Please title your pull request one of the following with the relevant issue number.** 
-* "Feature #XY: Feature Name"
-* "Bug #XY: Error"
-* "Issue #XY: Issue Name"
+* `Feature #XY: Feature Name`
+* `Bug #XY: Error`
+* `Issue #XY: Issue Name`
 
 ## What does the pull request do?
 You can detail what your pull request does in a major/minor changes list. Make note of any issues the pull request tackles. Use Markdown syntax to format your list of changes and improve clarity.
