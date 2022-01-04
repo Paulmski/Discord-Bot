@@ -59,8 +59,6 @@ channel_id=channel_id)
     async def announce_assignments(self, due_dates, title: str, channel_id=None):
         """Sends a Discord message with assignment due dates based on a Context channel or Announcements channel ID in .env."""
 
-        # Preface with @everyone header.
-        message = "@everyone"
 
         # Instantiate the Embed.
         embedded_message = discord.Embed(title=title, colour=discord.Colour.from_rgb(160, 165, 25))
@@ -69,8 +67,6 @@ channel_id=channel_id)
 
         # Checks if a channel_id has been passed as an argument, then checks .env ANNOUNCEMENT_CHANNEL, then checks for announcements channel, otherwises returns error.
         if self.bot.get_channel(channel_id) != None:
-            # If a channel ID is provided that means the function was called on demand, meaning @everyone should be avoided.
-            message = ""
             channel = self.bot.get_channel(channel_id)
         elif self.bot.get_channel(int(ANNOUNCEMENT_CHANNEL)) != None:
             channel = self.bot.get_channel(int(ANNOUNCEMENT_CHANNEL))
@@ -108,7 +104,7 @@ channel_id=channel_id)
         embedded_message.add_field(name="\n\nAbout Me", value="I am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
     
         # Send the message to the announcements channel.
-        await channel.send(message, embed=embedded_message, delete_after=86400.0)
+        await channel.send("", embed=embedded_message, delete_after=86400.0)
 
     def format_assignment(self, assignment: Assignment):
         """Formats an Assignment object to a string that will be displayed in a Discord Embed."""
