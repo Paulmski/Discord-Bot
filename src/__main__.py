@@ -208,14 +208,15 @@ def main():
     async def repeat(ctx, *, arg):
         await ctx.send(arg)
 
-    # Youtube search command
+    # Command for user to search YouTube for a tutorial video.
     @bot.command(pass_context=True)
     async def search(ctx, *, arg):
-        argSpace = arg.replace(" ", "+")
-        html = urllib.request.urlopen("https://www.youtube.com/results?search_query={}".format(argSpace))
+        arg_space = arg.replace(" ", "+")
+        html = urllib.request.urlopen("https://www.youtube.com/results?search_query={}".format(arg_space))
         video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
         await ctx.channel.send("https://www.youtube.com/watch?v=" + video_ids[0])    
 
+    # Only instantiate assignment fetcher and time scheduler if SPREADSHEET_ID and RANGE_NAME are specified.
     if SPREADSHEET_ID is not None and RANGE_NAME is not None:
         # Instantiate FetchDate and EventScheduler class.
         fetcher = events.FetchDate(service=service, bot=bot)
