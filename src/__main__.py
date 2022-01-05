@@ -199,8 +199,10 @@ def main():
                 await text_channel.set_permissions(member, read_messages=True)
                 await voice_channel.set_permissions(member, read_messages=True)
 
+
             logging.info(f'User {ctx.author} added members to private study group "{channel_name}": {[x.name for x in ctx.message.mentions]}')
                          
+
     # Print the message back.
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
@@ -209,10 +211,11 @@ def main():
     # Youtube search command
     @bot.command(pass_context=True)
     async def search(ctx, *, arg):
-        html = urllib.request.urlopen("https://www.youtube.com/results?search_query={}".format(arg))
+        argSpace = arg.replace(" ", "+")
+        html = urllib.request.urlopen("https://www.youtube.com/results?search_query={}".format(argSpace))
         video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
         await ctx.channel.send("https://www.youtube.com/watch?v=" + video_ids[0])    
-    
+
     if SPREADSHEET_ID is not None and RANGE_NAME is not None:
         # Instantiate FetchDate and EventScheduler class.
         fetcher = events.FetchDate(service=service, bot=bot)
