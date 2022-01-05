@@ -77,10 +77,6 @@ def main():
     # Command to list the assignments for a specific class.
     @bot.command(pass_context=True)
     async def list(ctx, code=None):
-
-
-
-
         if code == None:
             await ctx.channel.send('Invalid code entered, make sure you have the right course code e.g. "!list comp1271".')
             return
@@ -215,7 +211,8 @@ def main():
     # Youtube search command
     @bot.command(pass_context=True)
     async def search(ctx, *, arg):
-        html = urllib.request.urlopen("https://www.youtube.com/results?search_query={}".format(arg))
+        argSpace = arg.replace(" ", "+")
+        html = urllib.request.urlopen("https://www.youtube.com/results?search_query={}".format(argSpace))
         video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
         await ctx.channel.send("https://www.youtube.com/watch?v=" + video_ids[0])    
         
