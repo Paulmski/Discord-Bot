@@ -211,7 +211,7 @@ def main():
     # Command for user to search YouTube for a tutorial video.
     @bot.command(pass_context=True)
     async def search(ctx, *, arg):
-        arg_space = arg.replace(" ", "+")
+        arg_space = urllib.parse.quote(arg)
         html = urllib.request.urlopen("https://www.youtube.com/results?search_query={}".format(arg_space))
         video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
         await ctx.channel.send("https://www.youtube.com/watch?v=" + video_ids[0])    
