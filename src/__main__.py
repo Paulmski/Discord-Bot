@@ -199,8 +199,10 @@ def main():
                 await text_channel.set_permissions(member, read_messages=True)
                 await voice_channel.set_permissions(member, read_messages=True)
 
+
             logging.info(f'User {ctx.author} added members to private study group "{channel_name}": {[x.name for x in ctx.message.mentions]}')
                          
+
     # Print the message back.
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
