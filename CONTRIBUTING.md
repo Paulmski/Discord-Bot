@@ -139,7 +139,7 @@ Set the application type to `Desktop app` and give it any name.
 
 Now, from the Hamburger Menu, go to `Marketplace` and look up `Google Sheets API`. Enable the API on your account then go back to the `APIs & Services` section as before.
 
-Finally, you can download the OAuth2 Client ID. Download the file to the root directory Discord-Bot, and make sure you name it `credentials.json` !
+Finally, you can download the OAuth2 Client ID. Download the file to the `src` directory of Discord-Bot, and make sure you name it `credentials.json` !
 
 #### Step 4: Run the bot!
 The bot now has everything it needs to run. Run it from your local machine or a repl.it project and test it on a server you own.
