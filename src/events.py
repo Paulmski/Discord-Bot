@@ -78,33 +78,28 @@ class FetchDate(commands.Cog):
         # For every course in the due date list...
         course_assignments = ""
         due_dates_count = len(due_dates) - 1
-        current_course = due_dates[0].course_name
-        code = due_dates[0].code
+        current_code = due_dates[0].code
+        current_name = due_dates[0].course_name
 
         for i, assignment in enumerate(due_dates):
-
-            is_due_soon = 0 <= assignment.days_left <= 7
-
-            # Finish the course field if the course name has changed.
-            if assignment.course_name != current_course and assignment.course_name != "" and course_assignments != "":
-                embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
-                course_assignments = ""
-                current_course = assignment.course_name
-                code = assignment.code
-                if is_due_soon:
-                    course_assignments += self.format_assignment(assignment)
-
-            # Finish the course field if it is the last Assignment element.
-            elif i == due_dates_count:
-                if is_due_soon:
-                    course_assignments += self.format_assignment(assignment)
-                    embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
-
-            # Otherwise, add the assignment to course_assignments as normal.
-            elif is_due_soon:
+            # Default case where current assignment is the same course as the previous one
+            if assignment.code == current_code:
                 course_assignments += self.format_assignment(assignment)
-
-        # Add project information to bottom.
+            # Assignment is last and it is the same course as previous one
+            elif i == due_dates_count and assignment.code == current_code:
+                course_assignments += self.format_assignment(assignment)
+            # Assignment is last and it is not the same course as previous one
+            elif i == due_dates_count and assignment.code != current_code:
+                embedded_message.add_field(name=f"__{current_code} - {current_name}__", value=course_assignments + "", inline=False)
+                course_assignments = self.format_assignment(assignment) 
+            # Default case where assignment course is not the same as previous one and it is not the last assignment.
+            else:
+                embedded_message.add_field(name=f"__{current_code} - {current_name}__", value=course_assignments + "", inline=False)
+                course_assignments = self.format_assignment(assignment)
+            current_code = assignment.code
+            current_name = assignment.course_name
+            embedded_message.add_field(name=f"__{assignment.code} - {assignment.course_name}__", value=course_assignments + "", inline=False)
+    # Add project information to bottom.
         embedded_message.add_field(name="\n\nAbout Me", value="I am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
     
         # Send the message to the announcements channel.
