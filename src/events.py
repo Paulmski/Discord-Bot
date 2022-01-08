@@ -54,7 +54,9 @@ class FetchDate(commands.Cog):
     @fetch_due_dates.before_loop
     async def before_fetch(self):
         logging.debug("Initiating data fetching.")
-
+    
+    
+    # This function must be passed an array of assignments in which each assignment has its course code and course name
     async def announce_assignments(self, due_dates, title: str, channel_id=None):
         """Sends a Discord message with assignment due dates based on a Context channel or Announcements channel ID in .env."""
 
