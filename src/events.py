@@ -100,7 +100,7 @@ class FetchDate(commands.Cog):
                 course_assignments = self.format_assignment(assignment)
             current_code = assignment.code
             current_name = assignment.course_name
-            embedded_message.add_field(name=f"__{assignment.code} - {assignment.course_name}__", value=course_assignments + "", inline=False)
+        embedded_message.add_field(name=f"__{assignment.code} - {assignment.course_name}__", value=course_assignments + "", inline=False)
     # Add project information to bottom.
         embedded_message.add_field(name="\n\nAbout Me", value="I am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
     
