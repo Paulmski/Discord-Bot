@@ -88,17 +88,21 @@ def main():
         code = code.upper().replace('-', '').replace(' ','')
         assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
         final_assignments = []
-        is_relevant = False
-
+        current_course = ''
+        current_code = ''
         # Remove all courses that don't have a matching course code and aren't within 14 days.
         for assignment in assignments:
-            if code == 'ALL' or assignment.name != "":
+            if assignment.code != '':
+                current_course = assignment.course_name
+                current_code = assignment.code
+            if not -1 <= assignment.days_left <= 14:
+                continue
+            if assignment.code == "":
+                assignment.code = current_code
+            if code == 'ALL' or current_code == code:
+                assignment.course_name = current_course
+                assignment.code = current_code
                 final_assignments.append(assignment)
-            elif assignment.code == code or is_relevant:
-                final_assignments.append(assignment)
-                is_relevant = True
-            else:
-                is_relevant = False
 
         # No matching assignments found.
         if final_assignments == []:
