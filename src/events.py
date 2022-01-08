@@ -86,7 +86,7 @@ class FetchDate(commands.Cog):
             is_due_soon = 0 <= assignment.days_left <= 7
 
             # Finish the course field if the course name has changed.
-            if assignment.course_name != current_course and assignment.course_name != "":
+            if assignment.course_name != current_course and assignment.course_name != "" and course_assignments != "":
                 embedded_message.add_field(name=f"__{code} - {current_course}__", value=course_assignments + "", inline=False)
                 course_assignments = ""
                 current_course = assignment.course_name
