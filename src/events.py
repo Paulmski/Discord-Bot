@@ -50,7 +50,6 @@ class FetchDate(commands.Cog):
             channel = self.bot.get_channel(channel_id)
             await channel.send('Looks like there\'s no assignments in the next 7 days, you can relax... for now.')
         
-
     @fetch_due_dates.before_loop
     async def before_fetch(self):
         logging.debug("Initiating data fetching.")
@@ -59,7 +58,6 @@ class FetchDate(commands.Cog):
     # This function must be passed an array of assignments in which each assignment has its course code and course name
     async def announce_assignments(self, due_dates, title: str, channel_id=None):
         """Sends a Discord message with assignment due dates based on a Context channel or Announcements channel ID in .env."""
-
 
         # Instantiate the Embed.
         embedded_message = discord.Embed(title=title, colour=discord.Colour.from_rgb(160, 165, 25))
@@ -79,7 +77,6 @@ class FetchDate(commands.Cog):
           
         # For every course in the due date list...
         course_assignments = ""
-        due_dates_count = len(due_dates) - 1
         current_code = due_dates[0].code
         current_name = due_dates[0].course_name
 
