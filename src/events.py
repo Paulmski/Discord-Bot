@@ -50,7 +50,6 @@ class FetchDate(commands.Cog):
             channel = self.bot.get_channel(channel_id)
             await channel.send('Looks like there\'s no assignments in the next 7 days, you can relax... for now.')
         
-
     @fetch_due_dates.before_loop
     async def before_fetch(self):
         logging.debug("Initiating data fetching.")
@@ -59,7 +58,6 @@ class FetchDate(commands.Cog):
     # This function must be passed an array of assignments in which each assignment has its course code and course name
     async def announce_assignments(self, due_dates, title: str, channel_id=None):
         """Sends a Discord message with assignment due dates based on a Context channel or Announcements channel ID in .env."""
-
 
         # Instantiate the Embed.
         embedded_message = discord.Embed(title=title, colour=discord.Colour.from_rgb(160, 165, 25))
@@ -79,29 +77,27 @@ class FetchDate(commands.Cog):
           
         # For every course in the due date list...
         course_assignments = ""
-        due_dates_count = len(due_dates) - 1
         current_code = due_dates[0].code
         current_name = due_dates[0].course_name
 
         for i, assignment in enumerate(due_dates):
-            # Default case where current assignment is the same course as the previous one
+
+            # Default case where current assignment is the same course as the previous one.
             if assignment.code == current_code:
                 course_assignments += self.format_assignment(assignment)
-            # Assignment is last and it is the same course as previous one
-            elif i == due_dates_count and assignment.code == current_code:
-                course_assignments += self.format_assignment(assignment)
-            # Assignment is last and it is not the same course as previous one
-            elif i == due_dates_count and assignment.code != current_code:
-                embedded_message.add_field(name=f"__{current_code} - {current_name}__", value=course_assignments + "", inline=False)
-                course_assignments = self.format_assignment(assignment) 
-            # Default case where assignment course is not the same as previous one and it is not the last assignment.
+
+            # Default case when the assignment course differs from the previous one.
             else:
                 embedded_message.add_field(name=f"__{current_code} - {current_name}__", value=course_assignments + "", inline=False)
                 course_assignments = self.format_assignment(assignment)
+
             current_code = assignment.code
             current_name = assignment.course_name
-        embedded_message.add_field(name=f"__{assignment.code} - {assignment.course_name}__", value=course_assignments + "", inline=False)
-    # Add project information to bottom.
+
+        # Add the last field with the remaining course assignments.
+        embedded_message.add_field(name=f"__{current_code} - {current_name}__", value=course_assignments + "", inline=False)
+        
+        # Add project information to bottom.
         embedded_message.add_field(name="\n\nAbout Me", value="I am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
     
         # Send the message to the announcements channel.
