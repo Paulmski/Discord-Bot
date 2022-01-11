@@ -107,3 +107,15 @@ class Course():
         self.room = parsed_data["room"]
         self.status = parsed_data["status"]
         self.description = f"{self.code} - {self.name} will take place on {gmt_start_time.strftime('%A, %B %d')} from {th_start_time} to {th_end_time} in Room {self.room}."
+    
+    def to_json_event(self):
+        payload = {
+                    "entity_type": 3, # Value 3 is EXTERNAL events.
+                    "entity_metadata": { "location": f"Room {self.room}" },
+                    "name": f"{self.code} - {self.name}",
+                    "privacy_level": 2, # Required value as per documentation.
+                    "scheduled_start_time": str(self.start_time),
+                    "scheduled_end_time": str(self.end_time),
+                    "description": self.description
+                    }
+        return payload
