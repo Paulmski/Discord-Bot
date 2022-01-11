@@ -2,7 +2,7 @@ from discord.ext import tasks, commands
 import discord
 from time import sleep
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import sheets_parser
 from discord.http import Route
@@ -150,7 +150,7 @@ class EventScheduler(commands.Cog):
         
         if (datetime.now().hour != 6):
             return
-
+        
         await self.bot.wait_until_ready() # Bot needs to wait until ready, especially on the first iteration.
         # Set the class' guild state (bot.get_guild() returns a Guild object)
         guild = self.bot.get_guild(int(GUILD_ID))
@@ -164,7 +164,7 @@ class EventScheduler(commands.Cog):
         # Post events using HTTP.
         route = Route("POST", f"/guilds/{GUILD_ID}/scheduled-events", guild_id=GUILD_ID)
 
-        now = datetime.now()
+        now = datetime.now() + timedelta(hours=5)
         current_day = now.strftime("%A") # Formatted for weekday's full name.
         for course in schedule:
             if course.day == current_day and course.start_time > now:
