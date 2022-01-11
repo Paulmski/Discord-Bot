@@ -84,24 +84,23 @@ class FetchDate(commands.Cog):
         current_name = due_dates[0].course_name
 
         for i, assignment in enumerate(due_dates):
-            # Default case where current assignment is the same course as the previous one
+
+            # Default case where current assignment is the same course as the previous one.
             if assignment.code == current_code:
                 course_assignments += self.format_assignment(assignment)
-            # Assignment is last and it is the same course as previous one
-            elif i == due_dates_count and assignment.code == current_code:
-                course_assignments += self.format_assignment(assignment)
-            # Assignment is last and it is not the same course as previous one
-            elif i == due_dates_count and assignment.code != current_code:
-                embedded_message.add_field(name=f"__{current_code} - {current_name}__", value=course_assignments + "", inline=False)
-                course_assignments = self.format_assignment(assignment) 
-            # Default case where assignment course is not the same as previous one and it is not the last assignment.
+
+            # Default case when the assignment course differs from the previous one.
             else:
                 embedded_message.add_field(name=f"__{current_code} - {current_name}__", value=course_assignments + "", inline=False)
                 course_assignments = self.format_assignment(assignment)
+
             current_code = assignment.code
             current_name = assignment.course_name
-            embedded_message.add_field(name=f"__{assignment.code} - {assignment.course_name}__", value=course_assignments + "", inline=False)
-    # Add project information to bottom.
+
+        # Add the last field with the remaining course assignments.
+        embedded_message.add_field(name=f"__{current_code} - {current_name}__", value=course_assignments + "", inline=False)
+        
+        # Add project information to bottom.
         embedded_message.add_field(name="\n\nAbout Me", value="I am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
     
         # Send the message to the announcements channel.
