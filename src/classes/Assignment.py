@@ -97,7 +97,8 @@ class Assignment():
                 self.due = datetime.strptime(parsed_data["due_date"], "%b %d")
             except ValueError:
                 logging.warning('Unable to parse due_date {}'.format(parsed_data["due_date"]))
-
+                return
+        self.due = self.due.replace(self.due.year + (datetime.now().year - 1900))
         self.days_left = int(parsed_data["days_left"])
         self.course_name = parsed_data["course_name"]
         if parsed_data["notes"] != None:

@@ -107,7 +107,7 @@ class FetchDate(commands.Cog):
         """Formats an Assignment object to a string that will be displayed in a Discord Embed."""
         # Parse the information from the assignment list.
         name = assignment.name
-        due_date = assignment.due.replace(assignment.due.year + (datetime.now().year - 1900)).strftime("%A, %B %d")
+        due_date = assignment.due.strftime("%A, %B %d")
         days_left = assignment.days_left
 
         # Change days_left to a different code block color depending on days left.
