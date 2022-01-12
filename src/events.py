@@ -101,7 +101,7 @@ class FetchDate(commands.Cog):
         embedded_message.add_field(name="\n\nAbout Me", value="I am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
     
         # Send the message to the announcements channel.
-        await channel.send("", embed=embedded_message, delete_after=86400.0)
+        await channel.send("", embed=embedded_message, delete_after=23*60*60)
 
     def format_assignment(self, assignment: Assignment):
         """Formats an Assignment object to a string that will be displayed in a Discord Embed."""
