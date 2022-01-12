@@ -88,7 +88,7 @@ class Assignment():
 
         self.code = parsed_data["code"]
         self.name = parsed_data["assignment"]
-        self.due = datetime.strptime(parsed_data["due_date"], "%B %d")
+        self.due = datetime.strptime(parsed_data["due_date"], "%B %d, %Y")
         self.days_left = int(parsed_data["days_left"])
         self.course_name = parsed_data["course_name"]
         if parsed_data["notes"] != None:
