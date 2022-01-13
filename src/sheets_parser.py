@@ -37,12 +37,27 @@ def fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME):
         # Declare assignments list, will become an argument for announce_assignments() in events.py.
         assignments = []
 
+        current_course = ''
+        current_code = ''
+        # Remove all courses that don't have a matching course code and aren't within 14 days.
         for row in values[1:]:
             assignment = Assignment()
             assignment.parse_state(row, index)
+
             # If the assignment doesn't have a name, it's not a valid entry.
-            if assignment.name != '':
-                assignments.append(assignment)
+            if assignment.name == '':
+                continue
+
+            if assignment.code != '':
+                current_code = assignment.code
+            else:
+                assignment.code = current_code
+            if assignment.course_name != '':
+                current_course = assignment.course_name
+            else:
+                assignment.course_name = current_course
+                
+            assignments.append(assignment)
 
         return assignments
 
