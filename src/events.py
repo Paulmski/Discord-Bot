@@ -39,8 +39,8 @@ class FetchDate(commands.Cog):
         assignments = sheets_parser.fetch_assignments(self.service, SPREADSHEET_ID, RANGE_NAME)
         final_assignments = []
         for i, assignment in enumerate(assignments):
-            # Only assignments that are in the next 7 days will be shown.
-            if 0 <= assignment.days_left <= 7:
+            # Only assignments that are in the next 14 days will be shown.
+            if -1 <= assignment.days_left <= 14:
                 final_assignments.append(assignment)
 
         # Make a call to the @everyone event handler with the assignments array passed as an argument.
@@ -48,7 +48,7 @@ class FetchDate(commands.Cog):
             await self.announce_assignments(final_assignments, title="Due Dates For Today", channel_id=channel_id)
         elif channel_id != None:
             channel = self.bot.get_channel(channel_id)
-            await channel.send('Looks like there\'s no assignments in the next 7 days, you can relax... for now.')
+            await channel.send('Looks like there\'s no assignments in the next 14 days, you can relax... for now.')
         
     @fetch_due_dates.before_loop
     async def before_fetch(self):
