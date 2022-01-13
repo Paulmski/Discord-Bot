@@ -1,5 +1,7 @@
 # file app/__main__.py
 
+# Should be incremented each release.
+version_code = 'v1.0.0'
 def main():
     from discord.ext.commands import Bot
     from discord.ext import tasks, commands
@@ -50,6 +52,12 @@ def main():
     async def on_connect():
         logging.info("=== Connecting To Server ===")
 
+    @bot.command(pass_context=True)
+    async def version(ctx): 
+        '''
+        Show current version.
+        '''
+        await ctx.channel.send(version_code)
     # Flip a coin and tell the user what the result was.
     @bot.command(pass_context=True)
     async def coinflip(ctx):
