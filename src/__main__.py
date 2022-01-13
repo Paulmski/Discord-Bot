@@ -138,6 +138,7 @@ def main():
         # Or if the user tries to make a command on an already existing text-channel...
         elif args[1].lower() in [x.name for x in ctx.guild.text_channels]:
             await ctx.send('You cannot call `!group` using other channels as arguments.')
+            logging.info(f"User {ctx.author} attempted to create a study group using an already-existing channel name.")
             return
 
         # Command to create a study group.
@@ -258,6 +259,8 @@ def main():
         html = urllib.request.urlopen("https://www.youtube.com/results?search_query={}".format(arg_space))
         video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
         await ctx.channel.send("https://www.youtube.com/watch?v=" + video_ids[0])    
+        
+        logging.info(f"User {ctx.author} searched for {arg_space}.")
 
     # Only instantiate assignment fetcher and time scheduler if SPREADSHEET_ID and RANGE_NAME are specified.
     if SPREADSHEET_ID is not None and RANGE_NAME is not None:
