@@ -3,6 +3,7 @@
 # Should be incremented each release.
 version_code = 'v1.0.0'
 def main():
+    import string
     from discord.ext.commands import Bot
     from discord.ext import tasks, commands
     import discord.utils
@@ -138,31 +139,38 @@ def main():
         !group delete [group_name]        - Deletes a private study group you are in.
         !group add    [group_name] @users - Adds mentioned users to a study group you are in.
         '''
-        # If the user attempts to append the naming convention...
-        if args[1].endswith('-study-group'):
-            await ctx.send('You do not need to specify the -study-group suffix.')
-            return
+        # Iterates through arguments to obtain the group name of command. As soon as it encounters a special character it exits and the remaining characters are the designated group name.
+        group_name = ''
+        for word in args[1:]:
+            for character in word:
+                if character in string.ascii_letters + string.digits + '-':
+                    group_name += character
+                else:
+                    break
+            else:
+                group_name+='-'
+                continue
+            break
+        group_name = group_name.strip("-").lower()
 
-        # Or if the user tries to make a command on an already existing text-channel...
-        elif args[1].lower() in [x.name for x in ctx.guild.text_channels]:
-            await ctx.send('You cannot call `!group` using other channels as arguments.')
-            logging.info(f"User {ctx.author} attempted to create a study group using an already-existing channel name, #{args[1]}.")
+        if group_name == '':
+            await ctx.send('Invalid group name.')
             return
+        # Or if the user tries to make a command on an already existing text-channel...
+        for channel in ctx.guild.text_channels:
+            if channel.category.name != 'study-groups' and channel.name == group_name:
+                await ctx.send('You cannot call `!group` using other channels as arguments.')
+                logging.info(f"User {ctx.author} attempted to {args[0]} a study group using an already-existing channel name, #{group_name}.")
+                return 
 
         # Command to create a study group.
-        elif args[0] == 'create':
+        if args[0] == 'create':
 
-            # Check if user is using invalid naming.
-            if args[1] is None or args[1] == "" or '@' in args[1] or not all([x.isalnum() for x in args[1] if x != ' ']):
-                await ctx.send('Sorry, that is an invalid group name.')
-                return
-            
-            group_name = args[1].lower().replace(' ', '-') + '-study-group'
 
             # Check if a study group with the same name already exists.
             for text_channel in ctx.guild.text_channels:
                 if text_channel.name == group_name:
-                    await ctx.send('Sorry, that study group name already exists!')
+                    await ctx.send('Sorry, {group_name} already exists!')
                     return
                 
             # Create study group category if it doesn't exist.
@@ -195,23 +203,19 @@ def main():
         # Requires that the author already has read permissions for the channel.
         elif args[0] == 'delete': 
 
-            channel_name = args[1].lower() + '-study-group'
+            channel_name = group_name
             text_channel = discord.utils.get(ctx.guild.text_channels, name=channel_name)
 
             # Check if text_channel exists.
             if text_channel is None:
-                await ctx.send('Sorry, that study group doesn\'t exist!')
+                await ctx.send('Sorry, \"{}\" doesn\'t exist!'.format(group_name))
                 return
 
-            # Check if channel is in the 'study-groups' category.
-            if str(text_channel.category) != 'study-groups':
-                await ctx.send('You cannot delete this channel.')
-                return
 
             # Check if permissions are valid.
             overwrite = text_channel.overwrites_for(ctx.author)
             if overwrite.read_messages == False:
-                await ctx.send('Sorry, you don\'t have permissions to delete this study group.')
+                await ctx.send('Sorry, you don\'t have permissions to delete \"{}\".'.format(group_name))
                 return
 
             # Delete the text and voice channel.
@@ -224,7 +228,7 @@ def main():
         # Add a new user to an already existing study group.
         elif args[0] == 'add':
 
-            channel_name = args[1].lower() + '-study-group'
+            channel_name = group_name.lower() + '-study-group'
             text_channel = discord.utils.get(ctx.guild.text_channels, name=channel_name)
             voice_channel = discord.utils.get(ctx.guild.voice_channels, name=channel_name)
 
