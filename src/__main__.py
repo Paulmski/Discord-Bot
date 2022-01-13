@@ -54,6 +54,7 @@ def main():
     @bot.command(pass_context=True)
     async def coinflip(ctx):
         '''
+        Flips a coin.
         According to Teare and Murray's "Probability of a tossed coin landing on edge", extrapolations from a physical simulation model suggests "that the probability of an American nickel landing on edge is approximately 1 in 6000 tosses."
         
         Murray, Daniel B., and Scott W. Teare. “Probability of a Tossed Coin Landing on Edge.” Physical Review E, vol. 48, no. 4, 1993, pp. 2547–2552., https://doi.org/10.1103/physreve.48.2547.
@@ -77,7 +78,12 @@ def main():
     # Command to list the assignments for a specific class.
     @bot.command(pass_context=True)
     async def list(ctx, code=None):
+        '''
+        Lists the upcoming assignments within 14 days.
 
+        !list all     - Lists every assignment due in 14 days.
+        !list [code]  - Lists the course's assignments due in 14 days. 
+        '''
         if code == None:
             await ctx.channel.send('Invalid code entered, make sure you have the right course code e.g. "!list comp1271".')
             return
@@ -119,8 +125,9 @@ def main():
     async def group(ctx, *args):
         '''
         Creates private study groups.
-        !group create [group_name] @users - Creates a private study group and invites the mentinos
-        !group delete [group_name]        - Deletes a private study group you are in
+
+        !group create [group_name] @users - Creates a private study group and invites the mentions.
+        !group delete [group_name]        - Deletes a private study group you are in.
         !group add    [group_name] @users - Adds mentioned users to a study group you are in.
         '''
         # If the user attempts to append the naming convention...
@@ -232,11 +239,21 @@ def main():
     # Print the message back.
     @bot.command(pass_context=True)
     async def repeat(ctx, *, arg):
-        await ctx.send(arg)
+        '''
+        Repeats what you say and then deletes the message after 60 seconds.
+
+        !repeat After me.  - Bot responds with "After me."
+        '''
+        await ctx.send(arg, delete_after=60)
 
     # Command for user to search YouTube for a tutorial video.
     @bot.command(pass_context=True)
     async def search(ctx, *, arg):
+        '''
+        Searches for a YouTube tutorial video based on your search query.
+
+        !search Python Django - Searches for a Python Django tutorial on YouTube and returns the URL.
+        '''
         arg_space = urllib.parse.quote(arg)
         html = urllib.request.urlopen("https://www.youtube.com/results?search_query={}".format(arg_space))
         video_ids = re.findall(r"watch\?v=(\S{11})", html.read().decode())
