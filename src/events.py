@@ -78,7 +78,7 @@ class FetchDate(commands.Cog):
         # For every course in the due date list...
         course_assignments = ""
         current_code = due_dates[0].code
-        current_name = due_dates[0].course_name
+        current_course_name = due_dates[0].course_name
 
         for i, assignment in enumerate(due_dates):
 
@@ -88,14 +88,14 @@ class FetchDate(commands.Cog):
 
             # Default case when the assignment course differs from the previous one.
             else:
-                embedded_message.add_field(name=f"__{current_code} - {current_name}__", value=course_assignments + "", inline=False)
+                embedded_message.add_field(name=f"__{current_code} - {current_course_name}__", value=course_assignments + "", inline=False)
                 course_assignments = self.format_assignment(assignment)
+                current_code = assignment.code
+                current_course_name = assignment.course_name
 
-            current_code = assignment.code
-            current_name = assignment.course_name
 
         # Add the last field with the remaining course assignments.
-        embedded_message.add_field(name=f"__{current_code} - {current_name}__", value=course_assignments + "", inline=False)
+        embedded_message.add_field(name=f"__{current_code} - {current_course_name}__", value=course_assignments + "", inline=False)
         
         # Add project information to bottom.
         embedded_message.add_field(name="\n\nAbout Me", value="I am part of the Lakehead CS 2021 Guild's Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)")
