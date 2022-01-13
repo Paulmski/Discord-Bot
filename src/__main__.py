@@ -138,7 +138,7 @@ def main():
         # Or if the user tries to make a command on an already existing text-channel...
         elif args[1].lower() in [x.name for x in ctx.guild.text_channels]:
             await ctx.send('You cannot call `!group` using other channels as arguments.')
-            logging.info(f"User {ctx.author} attempted to create a study group using an already-existing channel name.")
+            logging.info(f"User {ctx.author} attempted to create a study group using an already-existing channel name, #{args[1]}.")
             return
 
         # Command to create a study group.
