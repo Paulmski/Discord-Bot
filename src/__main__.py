@@ -55,6 +55,7 @@ def main():
     async def coinflip(ctx):
         '''
         According to Teare and Murray's "Probability of a tossed coin landing on edge", extrapolations from a physical simulation model suggests "that the probability of an American nickel landing on edge is approximately 1 in 6000 tosses."
+        
         Murray, Daniel B., and Scott W. Teare. “Probability of a Tossed Coin Landing on Edge.” Physical Review E, vol. 48, no. 4, 1993, pp. 2547–2552., https://doi.org/10.1103/physreve.48.2547.
         '''
         rand = random.randint(0, 6000)
@@ -116,7 +117,12 @@ def main():
     # Command to create, modify permissions for, or delete private study groups.
     @bot.command(pass_context=True)
     async def group(ctx, *args):
-        
+        '''
+        Creates private study groups.
+        !group create [group_name] @users - Creates a private study group and invites the mentinos
+        !group delete [group_name]        - Deletes a private study group you are in
+        !group add    [group_name] @users - Adds mentioned users to a study group you are in.
+        '''
         # If the user attempts to append the naming convention...
         if args[1].endswith('-study-group'):
             await ctx.send('You do not need to specify the -study-group suffix.')
@@ -124,14 +130,14 @@ def main():
 
         # Or if the user tries to make a command on an already existing text-channel...
         elif args[1].lower() in [x.name for x in ctx.guild.text_channels]:
-            await ctx.send('You cannot make commands using channel names of other channels.')
+            await ctx.send('You cannot call `!group` using other channels as arguments.')
             return
 
         # Command to create a study group.
         elif args[0] == 'create':
 
             # Check if user is using invalid naming.
-            if args[1] is None or '@' in args[1] or not all([x.isalnum() for x in args[1] if x != ' ']):
+            if args[1] is None or args[1] == "" or '@' in args[1] or not all([x.isalnum() for x in args[1] if x != ' ']):
                 await ctx.send('Sorry, that is an invalid group name.')
                 return
             
