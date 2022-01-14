@@ -114,9 +114,9 @@ class FetchDate(commands.Cog):
         if days_left > 3:
             days_left = f"```diff\n+ {days_left} days remaining.```"
         elif days_left > 0:
-            days_left = f"```fix\n+ {days_left} days remaining.```"
+            days_left = f"```fix\n {days_left} days remaining.```"
         else:
-            days_left = f"```diff\n- {abs(days_left)} days remaining.```"
+            days_left = f"```diff\n- {days_left} days remaining.```"
 
         notes = assignment.note
 
