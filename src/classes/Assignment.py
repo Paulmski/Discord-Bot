@@ -5,7 +5,7 @@ from .parse_data import parse_data
 # Class to represent all assignments
 class Assignment():
     
-    def __init__(self, code="", name="", due=datetime.now(), days_left=-1, note="", course_name=""):
+    def __init__(self, code='', name='', due=datetime.now(), days_left=-1, note='', course_name=''):
         self.code = code
         self.name = name
         self.due = due
@@ -21,7 +21,7 @@ class Assignment():
     @code.setter
     def code(self, code):
         if not isinstance(code, str):
-            raise TypeError("Invalid code argument. Must be a string.")
+            raise TypeError('Invalid code argument. Must be a string.')
         self._code = code
         
     # Name of course
@@ -32,7 +32,7 @@ class Assignment():
     @name.setter
     def name(self, name):
         if not isinstance(name, str):
-            raise TypeError("Invalid name argument. Must be a string.")
+            raise TypeError('Invalid name argument. Must be a string.')
         self._name = name
       
     # Due date of assignment     
@@ -43,7 +43,7 @@ class Assignment():
     @due.setter
     def due(self, due):
         if not isinstance(due, datetime):
-            raise TypeError("Invalid due argument. Must be a datetime")
+            raise TypeError('Invalid due argument. Must be a datetime')
         self._due = due
     
     # Days left on assignment
@@ -54,7 +54,7 @@ class Assignment():
     @days_left.setter
     def days_left(self, days_left):
         if not isinstance(days_left, int):
-            raise TypeError("Invalid days_left argument. Must be a int")
+            raise TypeError('Invalid days_left argument. Must be a int')
         self._days_left = days_left
 
     # Any notes on assignment 
@@ -65,7 +65,7 @@ class Assignment():
     @note.setter
     def note(self, note):
         if not isinstance(note, str):
-            raise TypeError("Invalid note argument. Must be a string")
+            raise TypeError('Invalid note argument. Must be a string')
         self._note = note
 
     @property
@@ -75,33 +75,33 @@ class Assignment():
     @course_name.setter
     def course_name(self, course_name):
         if not isinstance(course_name, str):
-            raise TypeError("Invalid course_name argument. Must be a string")
+            raise TypeError('Invalid course_name argument. Must be a string')
         self._course_name = course_name
             
     def parse_state(self, row_data, indexes):
-        """Parses values from Google Sheet rows to set the object's state."""
+        '''Parses values from Google Sheet rows to set the object's state.'''
         
         parsed_data = parse_data(row_data, indexes)
 
         # If due_date from the parsed_data is empty, it's must be an empty row.
-        if parsed_data["due_date"] == None or parsed_data["due_date"] == "":
+        if parsed_data['due_date'] == None or parsed_data['due_date'] == '':
             return
 
-        self.code = parsed_data["code"]
-        self.name = parsed_data["assignment"]
+        self.code = parsed_data['code']
+        self.name = parsed_data['assignment']
         try:
-            self.due = datetime.strptime(parsed_data["due_date"], "%B %d, %Y")
+            self.due = datetime.strptime(parsed_data['due_date'], '%B %d, %Y')
         except ValueError:
             try:
-                self.due = datetime.strptime(parsed_data["due_date"], "%B %d")
+                self.due = datetime.strptime(parsed_data['due_date'], '%B %d')
             except ValueError:
                 try:
-                    self.due = datetime.strptime(parsed_data["due_date"], "%b %d")
+                    self.due = datetime.strptime(parsed_data['due_date'], '%b %d')
                 except ValueError:
-                    logging.warning('Unable to parse due_date {}'.format(parsed_data["due_date"]))
+                    logging.warning('Unable to parse due_date {}'.format(parsed_data['due_date']))
                     return
         self.due = self.due.replace(self.due.year + (datetime.now().year - 1900))
-        self.days_left = int(parsed_data["days_left"])
-        self.course_name = parsed_data["course_name"]
-        if parsed_data["notes"] != None:
-            self.note = parsed_data["notes"]
+        self.days_left = int(parsed_data['days_left'])
+        self.course_name = parsed_data['course_name']
+        if parsed_data['notes'] != None:
+            self.note = parsed_data['notes']

@@ -1,5 +1,7 @@
 def parse_data(row_data, indexes):
-    """Takes a list representing row data and parses out information based on a dictionary of indexes."""
+    '''
+    Takes a list representing row data and parses out information based on a dictionary of indexes.
+    '''
     parsed_data = {}
     for key in indexes.keys():
         try:
