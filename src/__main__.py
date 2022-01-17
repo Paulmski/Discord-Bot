@@ -1,7 +1,7 @@
 # file app/__main__.py
 
 # Should be incremented each release.
-version_code = 'v1.0.1'
+version_code = 'v1.0.0'
 def main():
     import string
     from discord.ext.commands import Bot
@@ -91,19 +91,48 @@ def main():
         Lists the upcoming assignments within 14 days.
 
         !list all     - Lists every assignment due in 14 days.
-        !list [code]  - Lists the course's assignments due in 14 days. 
+        !list [code]  - Lists the course's assignments due in 14 days.
+        !list courses - Lists all courses in the semester.
+        !list courses=[subject] - Lists all courses of the subject provided.
         '''
-        if code == None:
-            await ctx.channel.send('Invalid code entered, make sure you have the right course code e.g. `!list comp1271`.')
+        if code is None:
+            await ctx.channel.send(
+                'Invalid code entered, make sure you have the right course code e.g. `!list comp1271`.')
             return
         if SPREADSHEET_ID is None or RANGE_NAME is None:
             await ctx.channel.send('Internal error, no spreadsheet or range specified.')
             logging.warning('No SPREADSHEET_ID or RANGE_NAME specified in .env.')
             return
 
-        code = code.upper().replace('-', '').replace(' ','')
+        code = code.upper().replace('-', '').replace(' ', '')
         assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
         final_assignments = []
+
+        if code.startswith('COURSES'):
+            courses = sheets_parser.fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET)
+            final_courses = []
+            if not code.endswith('COURSES'):
+                print("In if")
+                prompt = code.split('=')
+                for course in courses:
+                    if course.code.startswith(prompt[1]):
+                        final_courses.append(course)
+                        if prompt[1] == 'MATH':
+                            break
+            else:
+                print("In else")
+                for course in courses:
+                    if not course.name.endswith("Lab"):
+                        final_courses.append(course)
+                for i in range(len(final_courses)-1):
+                    for j in range(len(final_courses)):
+                        if i != j and final_courses[i].name == final_courses[j].name:
+                            final_courses.pop(j)
+                            break
+            for c in final_courses:
+                await ctx.channel.send(c.code + " - " + c.name)
+            return
+
         # Remove all courses that don't have a matching course code and aren't within 14 days.
         for assignment in assignments:
             if (code == 'ALL' or assignment.code == code) and -1 <= assignment.days_left <= 14:
@@ -113,7 +142,7 @@ def main():
         if final_assignments == []:
             await ctx.channel.send(f'Couldn\'t find any assignments matching the course code "{code}".')
             return
-        
+
         title = 'Assignments for {}'.format(code)
         await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
         logging.info(f'User {ctx.author} requested assignments for {code}.')
