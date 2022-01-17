@@ -106,7 +106,7 @@ def main():
             logging.warning('No SPREADSHEET_ID or RANGE_NAME specified in .env.')
             return
 
-        code = code.upper().replace('-', '').replace(' ', '')
+        code = code.upper().replace('-', '').replace(' ','')
         assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
         final_assignments = []
 
@@ -114,7 +114,6 @@ def main():
             courses = sheets_parser.fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET)
             final_courses = []
             if not code.endswith('COURSES'):
-                print("In if")
                 prompt = code.split('=')
                 for course in courses:
                     if course.code.startswith(prompt[1]):
@@ -122,7 +121,6 @@ def main():
                         if prompt[1] == 'MATH':
                             break
             else:
-                print("In else")
                 for course in courses:
                     if not course.name.endswith("Lab"):
                         final_courses.append(course)
