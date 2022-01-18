@@ -46,7 +46,6 @@ class FetchDate(commands.Cog):
         # Make a call to the @everyone event handler with the assignments array passed as an argument.
         if final_assignments != []:
             await self.announce_assignments(final_assignments, title=':red_circle:Due Dates for Today:red_circle:', channel_id=channel_id)
-
         elif channel_id != None:
             channel = self.bot.get_channel(channel_id)
             await channel.send('Looks like there\'s no assignments in the next 14 days, you can relax... for now.')
@@ -116,7 +115,6 @@ class FetchDate(commands.Cog):
     
         # Send the message to the announcements channel.
         await channel.send('', embed=embedded_message)
-
 
     def format_assignment(self, assignment: Assignment):
         '''
