@@ -5,11 +5,10 @@ from .parse_data import parse_data
 # Class to represent all assignments
 class Assignment():
     
-    def __init__(self, code='', name='', due=datetime.now(), days_left=-1, note='', course_name=''):
+    def __init__(self, code='', name='', due=datetime.now(), note='', course_name=''):
         self.code = code
         self.name = name
         self.due = due
-        self.days_left = days_left
         self.note = note
         self.course_name = course_name
         
@@ -49,13 +48,9 @@ class Assignment():
     # Days left on assignment
     @property
     def days_left(self):
-        return self._days_left
+        delta = self.due - datetime.now()
+        return delta.days
     
-    @days_left.setter
-    def days_left(self, days_left):
-        if not isinstance(days_left, int):
-            raise TypeError('Invalid days_left argument. Must be a int')
-        self._days_left = days_left
 
     # Any notes on assignment 
     @property
@@ -94,14 +89,14 @@ class Assignment():
         except ValueError:
             try:
                 self.due = datetime.strptime(parsed_data['due_date'], '%B %d')
+                self.due = self.due.replace(self.due.year + (datetime.now().year - 1900))
             except ValueError:
                 try:
                     self.due = datetime.strptime(parsed_data['due_date'], '%b %d')
+                    self.due = self.due.replace(self.due.year + (datetime.now().year - 1900))
                 except ValueError:
                     logging.warning('Unable to parse due_date {}'.format(parsed_data['due_date']))
                     return
-        self.due = self.due.replace(self.due.year + (datetime.now().year - 1900))
-        self.days_left = int(parsed_data['days_left'])
         self.course_name = parsed_data['course_name']
         if parsed_data['notes'] != None:
             self.note = parsed_data['notes']
