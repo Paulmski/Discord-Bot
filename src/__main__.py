@@ -88,16 +88,16 @@ def main():
 
     # Command to list the assignments for a specific class.
     @bot.command(pass_context=True)
-    async def list(ctx, code=None):
+    async def list(ctx, *args):
         '''
         Lists the upcoming assignments within 14 days.
 
         !list all     - Lists every assignment due in 14 days.
         !list [code]  - Lists the course's assignments due in 14 days.
         !list courses - Lists all courses in the semester.
-        !list courses=[subject] - Lists all courses of the subject provided.
+        !list courses <subject codes seperated by spaces> - Lists all courses of the subjects provided.
         '''
-        if code is None:
+        if len(args) == 0:
             await ctx.channel.send(
                 'Invalid code entered, make sure you have the right course code e.g. `!list comp1271`.')
             return
@@ -106,31 +106,27 @@ def main():
             logging.warning('No SPREADSHEET_ID or RANGE_NAME specified in .env.')
             return
 
-        code = code.upper().replace('-', '').replace(' ','')
-        assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
         final_assignments = []
+        code = args[0].upper().replace('-', '').replace(' ','')
+        assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
 
-        if code.startswith('COURSES'):
+        message = '' # Message containing all specified courses.
+        if code == 'COURSES':
             courses = sheets_parser.fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET)
             final_courses = []
-            if not code.endswith('COURSES'):
-                prompt = code.split('=')
+            if args[-1].upper() == 'COURSES':
                 for course in courses:
-                    if course.code.startswith(prompt[1]):
-                        final_courses.append(course)
-                        if prompt[1] == 'MATH':
-                            break
+                    if not course.name.endswith("LAB"):
+                        message += '\n' + course.code + ' - ' + course.name
             else:
-                for course in courses:
-                    if not course.name.endswith("Lab"):
-                        final_courses.append(course)
-                for i in range(len(final_courses) - 1):
-                    for j in range(len(final_courses)):
-                        if i != j and final_courses[i].name == final_courses[j].name:
-                            final_courses.pop(j)
-                            break
-            for c in final_courses:
-                await ctx.channel.send(c.code + " - " + c.name)
+                # This section of code is currently O(n^2) if it can be optimized please do.
+                for arg in args:
+                    for course in courses:
+                        if arg.upper() in course.code:
+                            # Checks if the course has already been added to the message.
+                            if  course.code not in message:
+                                message += '\n' + course.code + ' - ' + course.name
+            await ctx.channel.send(message)
             return
 
         # Remove all courses that don't have a matching course code and aren't within 14 days.
