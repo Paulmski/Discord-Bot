@@ -29,7 +29,7 @@ class FetchDate(commands.Cog):
         self.fetch_due_dates.cancel()
               
     # Declare the fetch_due_dates loop. Loop will fully execute every 24 hours.
-    @tasks.loop(minutes=60.0)
+    @tasks.loop(minutes=60.00)
     async def fetch_due_dates(self, channel_id=None):
         if (datetime.now().hour != 6 and channel_id == None):
             return
@@ -45,7 +45,7 @@ class FetchDate(commands.Cog):
 
         # Make a call to the @everyone event handler with the assignments array passed as an argument.
         if final_assignments != []:
-            await self.announce_assignments(final_assignments, title='Due Dates For Today', channel_id=channel_id)
+            await self.announce_assignments(final_assignments, title=':red_circle:Due Dates for Today:red_circle:', channel_id=channel_id)
         elif channel_id != None:
             channel = self.bot.get_channel(channel_id)
             await channel.send('Looks like there\'s no assignments in the next 14 days, you can relax... for now.')
@@ -74,6 +74,19 @@ class FetchDate(commands.Cog):
         else:
             logging.error('Unable to find channel to send announcement to.')
             return
+
+
+        # Delete the last announcement from this channel.
+        
+        previous_messages = await channel.history(limit=10).flatten()
+        
+        for message in previous_messages:
+            if len(message.embeds) > 0:
+                if message.embeds[0].title == title:
+                    logging.info('Deleted previous Announcement message.')
+                    await message.delete() 
+                    sleep(4)
+
           
         # For every course in the due date list...
         course_assignments = ''
@@ -101,7 +114,7 @@ class FetchDate(commands.Cog):
         embedded_message.add_field(name='\n\nAbout Me', value='I am part of the Lakehead CS 2021 Guild\'s Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)')
     
         # Send the message to the announcements channel.
-        await channel.send('', embed=embedded_message, delete_after=23*60*60)
+        await channel.send('', embed=embedded_message)
 
     def format_assignment(self, assignment: Assignment):
         '''
@@ -116,9 +129,9 @@ class FetchDate(commands.Cog):
         if days_left > 3:
             days_left = f'```diff\n+ {days_left} days remaining.```'
         elif days_left > 0:
-            days_left = f'```fix\n {days_left} days remaining.```'
+            days_left = f'```fix\n+ {days_left} days remaining.```'
         else:
-            days_left = f'```diff\n- {days_left} days remaining.```'
+            days_left = f'```diff\n- {abs(days_left)} days remaining.```'
 
         notes = assignment.note
 
