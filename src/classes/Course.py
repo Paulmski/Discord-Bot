@@ -99,7 +99,7 @@ class Course():
         th_start_time = datetime.strptime(parsed_data['start_time'], '%H:%M').strftime('%I:%M%p')
         th_end_time = datetime.strptime(parsed_data['end_time'], '%H:%M').strftime('%I:%M%p')
 
-        self.code = parsed_data['code']
+        self.code = parsed_data['code'].upper()
         self.name = parsed_data['name']
         self.day = parsed_data['day']
         self.start_time = gmt_start_time
