@@ -32,6 +32,7 @@ class FetchDate(commands.Cog):
     @tasks.loop(minutes=60.00)
     async def fetch_due_dates(self):
 
+        await self.bot.wait_until_ready()
         if (datetime.now().hour != 6):
             return
         channel = None
