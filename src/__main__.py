@@ -92,10 +92,10 @@ def main():
         '''
         Lists the upcoming assignments within 14 days.
 
-        !list all     - Lists every assignment due in 14 days.
-        !list [code]  - Lists the course's assignments due in 14 days.
-        !list courses - Lists all courses in the semester.
-        !list courses <subject codes seperated by spaces> - Lists all courses of the subjects provided.
+        !list all             - Lists every assignment due in 14 days.
+        !list [code]          - Lists the course's assignments due in 14 days.
+        !list courses         - Lists all courses in the semester.
+        !list courses <codes> - Lists all courses of the subjects provided (e.g. "!list courses math comp entr").
         '''
         if len(args) == 0:
             await ctx.channel.send(
