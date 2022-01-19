@@ -49,7 +49,7 @@ class Assignment():
     @property
     def days_left(self):
         delta = self.due - datetime.now()
-        return delta.days
+        return delta.days + 1
     
 
     # Any notes on assignment 
