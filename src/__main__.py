@@ -117,7 +117,7 @@ def main():
             final_courses = []
             if args[-1].upper() == 'COURSES':
                 for course in courses:
-                    if not course.name.endswith("LAB"):
+                    if course.code not in message:
                         message += '\n' + course.code + ' - ' + course.name
             else:
                 # This section of code is currently O(n^2) if it can be optimized please do.
@@ -141,7 +141,7 @@ def main():
             return
 
         title = 'Assignments for {}'.format(code)
-        await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
+        await fetcher.announce_assignments(final_assignments, title=title, channel=ctx.channel)
         logging.info(f'User {ctx.author} requested assignments for {code}.')
 
     # Command to create, modify permissions for, or delete private study groups.
