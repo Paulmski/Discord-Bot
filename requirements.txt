@@ -5,8 +5,6 @@ cachetools==4.2.4
 certifi==2021.10.8
 chardet==4.0.0
 charset-normalizer==2.0.9
-discord==1.7.3
-discord.py==1.7.3
 google-api-core==2.3.0
 google-api-python-client==2.33.0
 google-auth==2.3.3
@@ -18,6 +16,7 @@ idna==3.3
 multidict==5.2.0
 oauthlib==3.1.1
 protobuf==3.19.1
+py-cord==2.0.0a4822+g9feb8c16
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pyparsing==3.0.6
@@ -29,4 +28,5 @@ six==1.16.0
 typing_extensions==4.0.1
 uritemplate==4.1.1
 urllib3==1.26.7
+yarg==0.1.9
 yarl==1.7.2
