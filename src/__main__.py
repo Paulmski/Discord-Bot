@@ -141,7 +141,7 @@ def main():
             return
 
         title = 'Assignments for {}'.format(code)
-        await fetcher.announce_assignments(final_assignments, title=title, channel=ctx.channel)
+        await fetcher.announce_assignments(final_assignments, title=title, channel=ctx.channel, delete_after=3600.0)
         logging.info(f'User {ctx.author} requested assignments for {code}.')
 
     # Command to create, modify permissions for, or delete private study groups.

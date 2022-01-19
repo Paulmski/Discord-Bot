@@ -75,7 +75,7 @@ class FetchDate(commands.Cog):
     
     
     # This function must be passed an array of assignments in which each assignment has its course code and course name
-    async def announce_assignments(self, due_dates, title: str, channel: discord.TextChannel):
+    async def announce_assignments(self, due_dates, title: str, channel: discord.TextChannel, delete_after=None):
         '''Sends a Discord message with assignment due dates based on a Context channel or Announcements channel ID in .env.'''
 
         # Instantiate the Embed.
@@ -111,9 +111,12 @@ class FetchDate(commands.Cog):
         
         # Add project information to bottom.
         embedded_message.add_field(name='\n\nAbout Me', value='I am part of the Lakehead CS 2021 Guild\'s Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)')
-    
-        # Send the message to the announcements channel.
-        await channel.send('', embed=embedded_message)
+
+        if isinstance(delete_after, float):
+            await channel.send('', embed=embedded_message, delete_after=delete_after) 
+        else:
+            # Send the message to the announcements channel.
+            await channel.send('', embed=embedded_message)
 
     def format_assignment(self, assignment: Assignment):
         '''
