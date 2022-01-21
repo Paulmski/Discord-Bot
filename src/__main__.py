@@ -1,7 +1,7 @@
 # file app/__main__.py
 
 # Should be incremented each release.
-version_code = 'v1.0.2'
+version_code = 'v1.0.3'
 def main():
     import string
     from discord.ext.commands import Bot
@@ -141,7 +141,7 @@ def main():
             return
 
         title = 'Assignments for {}'.format(code)
-        await fetcher.announce_assignments(final_assignments, title=title, channel=ctx.channel)
+        await fetcher.announce_assignments(final_assignments, title=title, channel=ctx.channel, delete_after=6 * 60 * 60.0)
         logging.info(f'User {ctx.author} requested assignments for {code}.')
 
     # Command to create, modify permissions for, or delete private study groups.
