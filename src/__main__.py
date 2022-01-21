@@ -1,7 +1,7 @@
 # file app/__main__.py
 
 # Should be incremented each release.
-version_code = 'v1.0.2'
+version_code = 'v1.0.3'
 def main():
     import string
     from discord.ext.commands import Bot
