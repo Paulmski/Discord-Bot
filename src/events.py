@@ -51,7 +51,7 @@ class FetchDate(commands.Cog):
         final_assignments = []
         for i, assignment in enumerate(assignments):
             # Only assignments that are in the next 14 days will be shown.
-            if -1 <= assignment.days_left <= 14:
+            if -1 <= assignment.days_left <= 7:
                 final_assignments.append(assignment)
 
         # Make a call to the @everyone event handler with the assignments array passed as an argument.
