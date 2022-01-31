@@ -53,7 +53,7 @@ def main():
         '''
         Show current version.
         '''
-        await ctx.channel.send(version_code)
+        await ctx.respond(version_code)
 
     # Flip a coin and tell the user what the result was.
     @bot.slash_command(guild_ids=[GUILD_ID])
@@ -69,16 +69,16 @@ def main():
             responses = ['Holy cow, it landed on it\'s side!', 'You won\'t believe this but it landed on its side!',
                          'Despite all odds, it landed on it\'s side!']
             random_response = random.choice([0, len(responses)])
-            await ctx.channel.send(responses[random_response])
+            await ctx.respond(responses[random_response])
         elif rand % 2 == 0:
-            await ctx.channel.send('Heads!')
+            await ctx.respond('Heads!')
         elif rand % 2 == 1:
-            await ctx.channel.send('Tails!')
+            await ctx.respond('Tails!')
 
     # Command to to fetch due dates on demand.
     @bot.slash_command(guild_ids=[GUILD_ID])
     async def homework(ctx):
-        await fetcher.fetch_due_dates(channel_id=ctx.channel.id)
+        await fetcher.fetch_due_dates(channel_id=ctx.id)
         logging.info(f'User {ctx.author} requested homework.')
 
     # Command to list the assignments for a specific class.
@@ -94,11 +94,11 @@ def main():
         '''
         
         if len(args) == 0:
-            await ctx.channel.send(
+            await ctx.respond(
                 'Invalid code entered, make sure you have the right course code e.g. `!list comp1271`.')
             return
         if SPREADSHEET_ID is None or RANGE_NAME is None:
-            await ctx.channel.send('Internal error, no spreadsheet or range specified.')
+            await ctx.respond('Internal error, no spreadsheet or range specified.')
             logging.warning('No SPREADSHEET_ID or RANGE_NAME specified in .env.')
             return
 
@@ -122,7 +122,7 @@ def main():
                             # Checks if the course has already been added to the message.
                             if  course.code not in message:
                                 message += '\n' + course.code + ' - ' + course.name
-            await ctx.channel.send(message)
+            await ctx.respond(message)
             return
 
         # Remove all courses that don't have a matching course code and aren't within 14 days.
@@ -132,11 +132,11 @@ def main():
 
         # No matching assignments found.
         if final_assignments == []:
-            await ctx.channel.send(f'Couldn\'t find any assignments matching the course code "{code}".')
+            await ctx.respond(f'Couldn\'t find any assignments matching the course code "{code}".')
             return
 
         title = 'Assignments for {}'.format(code)
-        await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.channel.id)
+        await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.id)
         logging.info(f'User {ctx.author} requested assignments for {code}.')
 
     # Command to create, modify permissions for, or delete private study groups.
@@ -164,12 +164,12 @@ def main():
         group_name = group_name.strip('-').lower()
 
         if group_name == '':
-            await ctx.send('Invalid group name.')
+            await ctx.respond('Invalid group name.')
             return
         # Or if the user tries to make a command on an already existing text-channel...
         for channel in ctx.guild.text_channels:
             if channel.category.name != 'study-groups' and channel.name == group_name:
-                await ctx.send('You cannot call `!group` using other channels as arguments.')
+                await ctx.respond('You cannot call `!group` using other channels as arguments.')
                 logging.info(
                     f'User {ctx.author} attempted to {args[0]} a study group using an already-existing channel name, #{group_name}.')
                 return
@@ -180,7 +180,7 @@ def main():
             # Check if a study group with the same name already exists.
             for text_channel in ctx.guild.text_channels:
                 if text_channel.name == group_name:
-                    await ctx.send(f'Sorry, {group_name} already exists!')
+                    await ctx.respond(f'Sorry, {group_name} already exists!')
                     return
 
             # Create study group category if it doesn't exist.
@@ -218,13 +218,13 @@ def main():
 
             # Check if text_channel exists.
             if text_channel is None:
-                await ctx.send(f'Sorry, "{group_name}" doesn\'t exist!')
+                await ctx.respond(f'Sorry, "{group_name}" doesn\'t exist!')
                 return
 
             # Check if permissions are valid.
             overwrite = text_channel.overwrites_for(ctx.author)
             if overwrite.read_messages == False:
-                await ctx.send(f'Sorry, you don\'t have permissions to delete "{group_name}".')
+                await ctx.respond(f'Sorry, you don\'t have permissions to delete "{group_name}".')
                 return
 
             # Delete the text and voice channel.
@@ -242,13 +242,13 @@ def main():
             voice_channel = discord.utils.get(ctx.guild.voice_channels, name=channel_name)
 
             if text_channel is None or voice_channel is None:
-                await ctx.send('Sorry, that study group doesn\'t exist!')
+                await ctx.respond('Sorry, that study group doesn\'t exist!')
                 return
 
             # Check if author has permission to add a new member.
             overwrite = text_channel.overwrites_for(ctx.author)
             if overwrite.read_messages == False:
-                await ctx.send('Sorry, you don\'t have permissions to add a new member to this study group')
+                await ctx.respond('Sorry, you don\'t have permissions to add a new member to this study group')
                 return
 
             # Give permissions for all mentioned members.
@@ -266,7 +266,7 @@ def main():
 
         !repeat After me.  - Bot responds with "After me."
         '''
-        await ctx.send(arg, delete_after=60)
+        await ctx.respond(arg, delete_after=60)
 
     # Command for user to search YouTube for a tutorial video.
     @bot.slash_command(guild_ids=[GUILD_ID])
@@ -279,7 +279,7 @@ def main():
         arg_space = urllib.parse.quote(arg)
         html = urllib.request.urlopen('https://www.youtube.com/results?search_query={}'.format(arg_space))
         video_ids = re.findall(r'watch\?v=(\S{11})', html.read().decode())
-        await ctx.channel.send('https://www.youtube.com/watch?v=' + video_ids[0])
+        await ctx.respond('https://www.youtube.com/watch?v=' + video_ids[0])
 
         logging.info(f'User {ctx.author} searched for {arg_space}.')
 
