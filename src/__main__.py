@@ -1,7 +1,7 @@
 # file app/__main__.py
 
 # Should be incremented each release.
-version_code = 'v1.0.2'
+version_code = 'v1.0.3'
 def main():
     import string
     from discord import Bot
@@ -113,7 +113,7 @@ def main():
             final_courses = []
             if args[-1].upper() == 'COURSES':
                 for course in courses:
-                    if not course.name.endswith("LAB"):
+                    if course.code not in message:
                         message += '\n' + course.code + ' - ' + course.name
             else:
                 # This section of code is currently O(n^2) if it can be optimized please do.
