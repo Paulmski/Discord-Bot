@@ -75,13 +75,6 @@ def main():
         elif rand % 2 == 1:
             await ctx.respond('Tails!')
 
-    # Command to to fetch due dates on demand.
-    @bot.slash_command(guild_ids=[GUILD_ID])
-    async def homework(ctx):
-        print(type(ctx))
-        await fetcher.fetch_due_dates(channel_id=ctx.interaction.channel_id)
-        logging.info(f'User {ctx.author} requested homework.')
-
     # Command to list the assignments for a specific class.
     @bot.slash_command(guild_ids=[GUILD_ID])
     async def list(ctx, *args):
