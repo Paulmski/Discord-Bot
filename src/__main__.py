@@ -4,8 +4,7 @@
 version_code = 'v1.0.2'
 def main():
     import string
-    from discord.ext.commands import Bot
-    from discord.ext import tasks, commands
+    from discord import Bot
     import discord.utils
     import random
     import os
@@ -38,30 +37,26 @@ def main():
     service = gsapi_builder.build_service()
 
     # Instantiate the bot, with the ! prefix preferred.
-    bot = Bot(command_prefix='!')
+    bot = Bot()
 
     # Print the bot information upon bootup.
     @bot.event
     async def on_ready():
+        logging.info('== Connecting To Server... ==')
         logging.info('Logged In')
         logging.info('Username: ' + bot.user.name)
         logging.debug(bot.user.id)
-        logging.info('== Connection Successful ==')
+        logging.info('=== Connection Successful ===')
 
-    # Print that the bot is connected to the server.
-    @bot.event
-    async def on_connect():
-        logging.info('=== Connecting To Server ===')
-
-    @bot.command(pass_context=True)
-    async def version(ctx):
+    @bot.slash_command(guild_ids=[GUILD_ID])
+    async def version(ctx): 
         '''
         Show current version.
         '''
         await ctx.channel.send(version_code)
 
     # Flip a coin and tell the user what the result was.
-    @bot.command(pass_context=True)
+    @bot.slash_command(guild_ids=[GUILD_ID])
     async def coinflip(ctx):
         '''
         Flips a coin.
@@ -81,13 +76,13 @@ def main():
             await ctx.channel.send('Tails!')
 
     # Command to to fetch due dates on demand.
-    @bot.command(pass_context=True)
+    @bot.slash_command(guild_ids=[GUILD_ID])
     async def homework(ctx):
         await fetcher.fetch_due_dates(channel_id=ctx.channel.id)
         logging.info(f'User {ctx.author} requested homework.')
 
     # Command to list the assignments for a specific class.
-    @bot.command(pass_context=True)
+    @bot.slash_command(guild_ids=[GUILD_ID])
     async def list(ctx, *args):
         '''
         Lists the upcoming assignments within 14 days.
@@ -145,7 +140,7 @@ def main():
         logging.info(f'User {ctx.author} requested assignments for {code}.')
 
     # Command to create, modify permissions for, or delete private study groups.
-    @bot.command(pass_context=True)
+    @bot.slash_command(guild_ids=[GUILD_ID])
     async def group(ctx, *args):
         '''
         Creates private study groups.
@@ -264,7 +259,7 @@ def main():
             logging.info(f'User {ctx.author} added members to private study group "{channel_name}": {[x.name for x in ctx.message.mentions]}')
 
     # Print the message back.
-    @bot.command(pass_context=True)
+    @bot.slash_command(guild_ids=[GUILD_ID])
     async def repeat(ctx, *, arg):
         '''
         Repeats what you say and then deletes the message after 60 seconds.
@@ -274,7 +269,7 @@ def main():
         await ctx.send(arg, delete_after=60)
 
     # Command for user to search YouTube for a tutorial video.
-    @bot.command(pass_context=True)
+    @bot.slash_command(guild_ids=[GUILD_ID])
     async def search(ctx, *, arg):
         '''
         Searches for a YouTube tutorial video based on your search query.
