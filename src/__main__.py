@@ -250,23 +250,23 @@ def main():
 
     # Print the message back.
     @bot.slash_command(guild_ids=[GUILD_ID])
-    async def repeat(ctx, *, arg):
+    async def repeat(ctx, string):
         '''
         Repeats what you say and then deletes the message after 60 seconds.
 
         !repeat After me.  - Bot responds with "After me."
         '''
-        await ctx.respond(arg, delete_after=60)
+        await ctx.respond(string, delete_after=60)
 
     # Command for user to search YouTube for a tutorial video.
     @bot.slash_command(guild_ids=[GUILD_ID])
-    async def search(ctx, *, arg):
+    async def search(ctx, subject):
         '''
         Searches for a YouTube tutorial video based on your search query.
 
         !search Python Django - Searches for a Python Django tutorial on YouTube and returns the URL.
         '''
-        arg_space = urllib.parse.quote(arg)
+        arg_space = urllib.parse.quote(subject)
         html = urllib.request.urlopen('https://www.youtube.com/results?search_query={}'.format(arg_space))
         video_ids = re.findall(r'watch\?v=(\S{11})', html.read().decode())
         await ctx.respond('https://www.youtube.com/watch?v=' + video_ids[0])
