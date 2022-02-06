@@ -5,6 +5,7 @@ version_code = 'v1.0.3'
 def main():
     import string
     from discord import Bot
+    from discord.commands import Option
     import discord.utils
     import random
     import os
@@ -35,13 +36,17 @@ def main():
 
     # Build the Google Sheets API service.
     service = gsapi_builder.build_service()
+    COURSE_CODES = list(set([f'{course.code} - {course.name}' for course in sheets_parser.fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET)]))
+    COURSE_CODES.sort()
+    COURSE_CODES.insert(0, 'COURSES')
 
-    # Instantiate the bot, with the ! prefix preferred.
+    # Instantiate the bot.
     bot = Bot()
 
-    # Print the bot information upon bootup.
+    # Print the bot information upon bootup, fill course code list using GSAPI service.
     @bot.event
     async def on_ready():
+        global COURSE_CODES
         logging.info('== Connecting To Server... ==')
         logging.info('Logged In')
         logging.info('Username: ' + bot.user.name)
@@ -77,45 +82,31 @@ def main():
 
     # Command to list the assignments for a specific class.
     @bot.slash_command(guild_ids=[GUILD_ID])
-    async def list(ctx, *args):
+    async def assignments(ctx, specify: Option(str, 'Return the upcoming assignments within 14 days from...', choices=COURSE_CODES)):
         '''
-        Lists the upcoming assignments within 14 days.
+        Returns the upcoming assignments within 14 days.
 
         !list all             - Lists every assignment due in 14 days.
         !list [code]          - Lists the course's assignments due in 14 days.
         !list courses         - Lists all courses in the semester.
-        !list courses <codes> - Lists all courses of the subjects provided (e.g. "!list courses math comp entr").
         '''
-        
-        if len(args) == 0:
-            await ctx.respond(
-                'Invalid code entered, make sure you have the right course code e.g. `!list comp1271`.')
-            return
+
         if SPREADSHEET_ID is None or RANGE_NAME is None:
             await ctx.respond('Internal error, no spreadsheet or range specified.')
             logging.warning('No SPREADSHEET_ID or RANGE_NAME specified in .env.')
             return
 
         final_assignments = []
-        code = args[0].upper().replace('-', '').replace(' ','')
+        code = specify.upper().split()[0]
         assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
 
         message = '' # Message containing all specified courses.
-        if code == 'COURSES':
+        if code.upper() == 'COURSES':
             courses = sheets_parser.fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET)
-            final_courses = []
-            if args[-1].upper() == 'COURSES':
+            if code.upper() == 'COURSES':
                 for course in courses:
                     if course.code not in message:
                         message += '\n' + course.code + ' - ' + course.name
-            else:
-                # This section of code is currently O(n^2) if it can be optimized please do.
-                for arg in args:
-                    for course in courses:
-                        if arg.upper() in course.code:
-                            # Checks if the course has already been added to the message.
-                            if  course.code not in message:
-                                message += '\n' + course.code + ' - ' + course.name
             await ctx.respond(message)
             return
 
@@ -126,11 +117,11 @@ def main():
 
         # No matching assignments found.
         if final_assignments == []:
-            await ctx.respond(f'Couldn\'t find any assignments matching the course code "{code}".')
+            await ctx.respond(f'Couldn\'t find any assignments within 14 days matching the course code "{code}".')
             return
 
         title = 'Assignments for {}'.format(code)
-        await fetcher.announce_assignments(final_assignments, title=title, channel_id=ctx.id)
+        await fetcher.announce_assignments(final_assignments, title=title, ctx=ctx)
         logging.info(f'User {ctx.author} requested assignments for {code}.')
 
     # Command to create, modify permissions for, or delete private study groups.
