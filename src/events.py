@@ -35,6 +35,7 @@ class FetchDate(commands.Cog):
         await self.bot.wait_until_ready()
         if (datetime.now().hour != 6):
             return
+
         channel = None
         # Check ANNOUNCEMENT_CHANNEL has been set otherwise use channel named announcements otherwise return error.
         if self.bot.get_channel(int(ANNOUNCEMENT_CHANNEL)) != None:
@@ -44,6 +45,7 @@ class FetchDate(commands.Cog):
         else:
             logging.error('Unable to find channel to send announcement to.')
             return
+
         logging.info('Fetching due dates...')
 
         # Pass Sheets service and metadata to sheets_parser.fetch_due_dates()
@@ -66,22 +68,22 @@ class FetchDate(commands.Cog):
                         logging.info('Deleted previous Announcement message.')
                         await message.delete() 
                         sleep(4)
-            await self.announce_assignments(final_assignments, title=':red_circle:Due Dates for Today:red_circle:', channel=channel)
+            await self.announce_assignments(final_assignments, ':red_circle:Due Dates for Today:red_circle:', channel)
         else:
             logging.info('No assignments found due soon.')
+
     @fetch_due_dates.before_loop
     async def before_fetch(self):
         logging.debug('Initiating data fetching.')
     
-    
     # This function must be passed an array of assignments in which each assignment has its course code and course name
-    async def announce_assignments(self, due_dates, title: str, ctx: discord.ApplicationContext, delete_after=None):
+    async def announce_assignments(self, due_dates, title: str, channel):
         '''Sends a Discord message with assignment due dates based on a Context channel or Announcements channel ID in .env.'''
 
         # Instantiate the Embed.
         embedded_message = discord.Embed(title=title, colour=discord.Colour.from_rgb(160, 165, 25))
 
-        await self.bot.wait_until_ready() # Bot needs to wait until ready to send message in correct channel.
+        await self.bot.wait_until_ready()
 
         # For every course in the due date list...
         course_assignments = ''
@@ -101,18 +103,18 @@ class FetchDate(commands.Cog):
                 current_code = assignment.code
                 current_course_name = assignment.course_name
 
-
         # Add the last field with the remaining course assignments.
         embedded_message.add_field(name=f'__{current_code} - {current_course_name}__', value=course_assignments + '', inline=False)
         
         # Add project information to bottom.
         embedded_message.add_field(name='\n\nAbout Me', value='I am part of the Lakehead CS 2021 Guild\'s Discord-Bot project! [Contributions on GitHub are welcome!](https://github.com/Paulmski/Discord-Bot/blob/main/CONTRIBUTING.md)')
 
-        if isinstance(delete_after, float):
-            await ctx.respond('', embed=embedded_message, delete_after=delete_after) 
+        if type(channel) == discord.channel.TextChannel:
+            await channel.send('', embed=embedded_message) 
+        elif type(channel) == discord.ApplicationContext:
+            await channel.respond('', embed=embedded_message)
         else:
-            # Send the message to the announcements channel.
-            await ctx.respond('', embed=embedded_message)
+            logging.warn(f'Invalid object type passed to announce_assignments. Type of {type(channel)} is not one of discord.channel.TextChannel, discord.ApplicationContext')
 
     def format_assignment(self, assignment: Assignment):
         '''

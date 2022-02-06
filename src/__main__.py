@@ -46,7 +46,6 @@ def main():
     # Print the bot information upon bootup, fill course code list using GSAPI service.
     @bot.event
     async def on_ready():
-        global COURSE_CODES
         logging.info('== Connecting To Server... ==')
         logging.info('Logged In')
         logging.info('Username: ' + bot.user.name)
@@ -121,7 +120,7 @@ def main():
             return
 
         title = 'Assignments for {}'.format(code)
-        await fetcher.announce_assignments(final_assignments, title=title, ctx=ctx)
+        await fetcher.announce_assignments(final_assignments, title, ctx)
         logging.info(f'User {ctx.author} requested assignments for {code}.')
 
     # Command to create, modify permissions for, or delete private study groups.
