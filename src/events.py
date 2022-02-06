@@ -2,7 +2,7 @@ from discord.ext import tasks, commands
 import discord
 from time import sleep
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 import logging
 import sheets_parser
 from discord.http import Route
@@ -59,16 +59,19 @@ class FetchDate(commands.Cog):
         # Make a call to the @everyone event handler with the assignments array passed as an argument.
         if final_assignments != []:
             # Delete the last announcement from this channel.
-            title =  ':red_circle: Due Dates for Today :red_circle:'
+            title = ':red_circle: Due Dates for Today :red_circle:'
             previous_messages = await channel.history(limit=10).flatten()
             
             for message in previous_messages:
                 if len(message.embeds) > 0:
                     if message.embeds[0].title == title:
-                        logging.info('Deleted previous Announcement message.')
+                        logging.info(f'Deleted previous announcement message.')
                         await message.delete() 
                         sleep(4)
-            await self.announce_assignments(final_assignments, ':red_circle:Due Dates for Today:red_circle:', channel)
+                        
+            await self.announce_assignments(final_assignments, title, channel)
+            logging.info('A new announcement for assignments was made.')
+
         else:
             logging.info('No assignments found due soon.')
 
@@ -177,7 +180,7 @@ class EventScheduler(commands.Cog):
         # Post events using HTTP.
         route = Route('POST', f'/guilds/{GUILD_ID}/scheduled-events', guild_id=GUILD_ID)
 
-        now = datetime.now() + timedelta(hours=5)
+        now = datetime.now(timezone.utc)
         current_day = now.strftime('%A') # Formatted for weekday's full name.
         for course in schedule:
             if course.day == current_day and course.start_time > now:
@@ -185,7 +188,7 @@ class EventScheduler(commands.Cog):
                 await self.bot.http.request(route, json=event)
                 sleep(0.5) # Waiting 0.5 seconds to prevent API limiting.
                 
-    @tasks.loop(minutes=1)
+    @tasks.loop(minutes=1.0)
     async def purge_study_groups(self):
 
         guild = self.bot.get_guild(int(GUILD_ID))
@@ -203,9 +206,8 @@ class EventScheduler(commands.Cog):
 
             if last_message is None: continue
 
-            # timedelta using EST timezone.
-            now = datetime.now()
-            time_diff = (now + timedelta(hours=5) - last_message.created_at.replace(tzinfo=None)).total_seconds()
+            now = datetime.now(timezone.utc)
+            time_diff = (now - last_message.created_at).total_seconds()
             
             if time_diff > 13 * 24 * 60 * 60:
                 channel.send_message('@everyone\nThis channel will be deleted if it is inactive for 1 more day.')
