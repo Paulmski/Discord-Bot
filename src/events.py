@@ -202,15 +202,19 @@ class EventScheduler(commands.Cog):
                 last_message = messages[0]
 
             if last_message is None: continue
+
+            # timedelta using EST timezone.
+            now = datetime.now()
+            time_diff = (now + timedelta(hours=5) - last_message.created_at.replace(tzinfo=None)).total_seconds()
             
-            if (datetime.now() - last_message.created_at).total_seconds() > 13 * 24 * 60 * 60:
+            if time_diff > 13 * 24 * 60 * 60:
                 channel.send_message('@everyone\nThis channel will be deleted if it is inactive for 1 more day.')
                 
-            if (datetime.now() - last_message.created_at).total_seconds() > 14 * 23 * 60 * 60:
+            if time_diff > 14 * 23 * 60 * 60:
                 channel.send_message('@everyone\nThis channel will be deleted if it is inactive for 1 more hour.')
                 
             # Study group inactive for 14 days will be deleted.
-            if (datetime.now() - last_message.created_at).total_seconds() > 14 * 24 * 60 *60:
+            if time_diff > 14 * 24 * 60 *60:
                 voice_channel = discord.utils.get(guild.voice_channels, name=channel.name)
                 await voice_channel.delete()
                 await channel.delete()
