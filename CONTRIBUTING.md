@@ -47,7 +47,9 @@ Firstly, create a Discord Bot Account through your [Applications page](https://d
 ### Letting the Bot Into Your Test Server
 Once you have done that, make sure to create a OAuth2 URL to invite your bot to your test server.
 
-Go to OAuth2 > URL Generator and select `bot` as the scope. You should then give the bot the appropriate server permissions. The URL to invite your bot a server _you_ own will be at the bottom of the page.
+Go to OAuth2 > URL Generator and select `bot` and `applications.command` as the scope. You should then give the bot the appropriate server permissions. The URL to invite your bot a server _you_ own will be at the bottom of the page.
+
+![image](https://user-images.githubusercontent.com/93796037/152694766-f99dcdcf-0a70-44a5-8b44-533b60c5f560.png)
 
 ### Setting Up `.env` Fully
 In order for the bot to actually work, you need to fill in a file called `.env` in your `src` folder, something that isn't done automatically.
