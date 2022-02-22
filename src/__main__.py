@@ -125,7 +125,12 @@ def main():
 
     # Command to create, modify permissions for, or delete private study groups.
     @bot.slash_command(guild_ids=[GUILD_ID])
-    async def group(ctx, command: Option(str, 'Create, delete, or add a group.', choices=['create', 'delete', 'add']), name_of_group: Option(str, 'The name of your group.'), mention: Option(discord.User, 'Mention members you want to add to your group.')=None):
+    async def group(ctx, 
+                    command: Option(str, 'Create, delete, or add a group.', choices=['create', 'delete', 'add']), 
+                    name_of_group: Option(str, 'The name of your group.'), 
+                    mention1: Option(discord.User, 'Mention members you want to add to your group.')=None, 
+                    mention2: Option(discord.User, 'Mention members you want to add to your group.')=None, 
+                    mention3: Option(discord.User, 'Mention members you want to add to your group.')=None):
         '''
         Creates private study groups. Mention users you want to add to your group.
 
@@ -133,10 +138,13 @@ def main():
         !group delete [group_name]        - Deletes a private study group you are in.
         !group add    [group_name] @users - Adds mentioned users to a study group you are in.
 
-        Due to the limitations of slash commands, only one user can be mentioned per command.
+        Due to the limitations of slash commands, a variable number of mentions cannot be used in the command.
         '''
-        # Iterates through arguments to obtain the group name of command. As soon as it encounters a special character it exits and the remaining characters are the designated group name.
+        
         group_name = ''
+        mentions = [user for user in [mention1, mention2, mention3] if user is not None]
+        
+        # Iterates through arguments to obtain the group name of command. As soon as it encounters a special character it exits and the remaining characters are the designated group name.
         for word in name_of_group.split():
             for character in word:
                 if character in string.ascii_letters + string.digits + '-':
@@ -188,9 +196,10 @@ def main():
             await voice_channel.set_permissions(ctx.guild.default_role, read_messages=False)
             
             # Allow mentioned user to view channel.
-            if mention is not None:
-                await text_channel.set_permissions(mention, read_messages=True)
-                await voice_channel.set_permissions(mention, read_messages=True)
+            if mentions is not None:
+                for mention in mentions:
+                    await text_channel.set_permissions(mention, read_messages=True)
+                    await voice_channel.set_permissions(mention, read_messages=True)
 
             await text_channel.set_permissions(ctx.author, read_messages=True)
             await voice_channel.set_permissions(ctx.author, read_messages=True)
