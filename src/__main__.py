@@ -73,11 +73,11 @@ def main():
             responses = ['Holy cow, it landed on it\'s side!', 'You won\'t believe this but it landed on its side!',
                          'Despite all odds, it landed on it\'s side!']
             random_response = random.choice([0, len(responses)])
-            await ctx.respond(responses[random_response], delete_after=60)
+            await ctx.respond(responses[random_response], delete_after=120)
         elif rand % 2 == 0:
-            await ctx.respond('Heads!', delete_after=60)
+            await ctx.respond('Heads!', delete_after=120)
         elif rand % 2 == 1:
-            await ctx.respond('Tails!', delete_after=60)
+            await ctx.respond('Tails!', delete_after=120)
 
     # Command to list the assignments for a specific class.
     @bot.slash_command(guild_ids=[GUILD_ID])
@@ -91,7 +91,7 @@ def main():
         '''
 
         if SPREADSHEET_ID is None or RANGE_NAME is None:
-            await ctx.respond('Internal error, no spreadsheet or range specified.', delete_after=60)
+            await ctx.respond('Internal error, no spreadsheet or range specified.', delete_after=120)
             logging.warning('No SPREADSHEET_ID or RANGE_NAME specified in .env.')
             return
 
@@ -116,7 +116,7 @@ def main():
 
         # No matching assignments found.
         if final_assignments == []:
-            await ctx.respond(f'Couldn\'t find any assignments within 14 days matching the course code `{code}`.', delete_after=60)
+            await ctx.respond(f'Couldn\'t find any assignments within 14 days matching the course code `{code}`.', delete_after=120)
             return
 
         title = 'Assignments for {}'.format(code)
@@ -125,7 +125,12 @@ def main():
 
     # Command to create, modify permissions for, or delete private study groups.
     @bot.slash_command(guild_ids=[GUILD_ID])
-    async def group(ctx, command: Option(str, 'Create, delete, or add a group.', choices=['create', 'delete', 'add']), name_of_group: Option(str, 'The name of your group.'), mention: Option(discord.User, 'Mention members you want to add to your group.')=None):
+    async def group(ctx, 
+                    command: Option(str, 'Create, delete, or add a group.', choices=['create', 'delete', 'add']), 
+                    name_of_group: Option(str, 'The name of your group.'), 
+                    mention1: Option(discord.User, 'Mention members you want to add to your group.')=None, 
+                    mention2: Option(discord.User, 'Mention members you want to add to your group.')=None, 
+                    mention3: Option(discord.User, 'Mention members you want to add to your group.')=None):
         '''
         Creates private study groups. Mention users you want to add to your group.
 
@@ -133,10 +138,13 @@ def main():
         !group delete [group_name]        - Deletes a private study group you are in.
         !group add    [group_name] @users - Adds mentioned users to a study group you are in.
 
-        Due to the limitations of slash commands, only one user can be mentioned per command.
+        Due to the limitations of slash commands, a variable number of mentions cannot be used in the command.
         '''
-        # Iterates through arguments to obtain the group name of command. As soon as it encounters a special character it exits and the remaining characters are the designated group name.
+        
         group_name = ''
+        mentions = [user for user in [mention1, mention2, mention3] if user is not None]
+        
+        # Iterates through arguments to obtain the group name of command. As soon as it encounters a special character it exits and the remaining characters are the designated group name.
         for word in name_of_group.split():
             for character in word:
                 if character in string.ascii_letters + string.digits + '-':
@@ -150,7 +158,7 @@ def main():
         group_name = group_name.strip('-').lower()
 
         if group_name == '':
-            await ctx.respond('You have given an invalid group name.', delete_after=60)
+            await ctx.respond('You have given an invalid group name.', delete_after=120)
             logging.info(f'User {ctx.author} failed to make a study group named `{group_name}`')
             return
 
@@ -158,7 +166,7 @@ def main():
         for channel in ctx.interaction.guild.text_channels:
 
             if channel.category.name != 'study-groups' and channel.name == group_name:
-                await ctx.respond('You cannot call `!group` using other channels as arguments.', delete_after=60)
+                await ctx.respond('You cannot call `!group` using other channels as arguments.', delete_after=120)
                 logging.info(f'User {ctx.author} attempted to {command} a study group using an already-existing channel name, #{group_name}.')
                 return
 
@@ -168,7 +176,7 @@ def main():
             # Check if a study group with the same name already exists.
             for text_channel in ctx.guild.text_channels:
                 if text_channel.name == group_name:
-                    await ctx.respond(f'Sorry, {group_name} already exists!', delete_after=60)
+                    await ctx.respond(f'Sorry, {group_name} already exists!', delete_after=120)
                     return
 
             # Create study group category if it doesn't exist.
@@ -188,14 +196,15 @@ def main():
             await voice_channel.set_permissions(ctx.guild.default_role, read_messages=False)
             
             # Allow mentioned user to view channel.
-            if mention is not None:
-                await text_channel.set_permissions(mention, read_messages=True)
-                await voice_channel.set_permissions(mention, read_messages=True)
+            if mentions is not None:
+                for mention in mentions:
+                    await text_channel.set_permissions(mention, read_messages=True)
+                    await voice_channel.set_permissions(mention, read_messages=True)
 
             await text_channel.set_permissions(ctx.author, read_messages=True)
             await voice_channel.set_permissions(ctx.author, read_messages=True)
 
-            await ctx.respond(f'You have successfully created a study group called `{group_name}`.', delete_after=60)
+            await ctx.respond(f'You have successfully created a study group called `{group_name}`.')
             logging.info(f'User {ctx.author} successfully created private study group "{group_name}".')
 
         # Command to delete a study group text and voice channel.
@@ -206,13 +215,13 @@ def main():
 
             # Check if text_channel exists.
             if text_channel is None:
-                await ctx.respond(f'Sorry, `{group_name}` doesn\'t exist!', delete_after=60)
+                await ctx.respond(f'Sorry, `{group_name}` doesn\'t exist!', delete_after=120)
                 return
 
             # Check if permissions are valid.
             overwrite = text_channel.overwrites_for(ctx.author)
             if overwrite.read_messages == False:
-                await ctx.respond(f'Sorry, you don\'t have permissions to delete `{group_name}`.', delete_after=60)
+                await ctx.respond(f'Sorry, you don\'t have permissions to delete `{group_name}`.', delete_after=120)
                 return
 
             # Delete the text and voice channel.
@@ -220,7 +229,7 @@ def main():
             voice_channel = discord.utils.get(ctx.guild.voice_channels, name=group_name)
             await voice_channel.delete()
 
-            await ctx.respond(f'You have successfully deleted the `{group_name}`.study group.', delete_after=60)
+            await ctx.respond(f'You have successfully deleted the `{group_name}`.study group.')
             logging.info(f'User {ctx.author} successfully deleted private study group "{group_name}".')
 
         # Add a new user to an already existing study group.
@@ -230,23 +239,23 @@ def main():
                 voice_channel = discord.utils.get(ctx.guild.voice_channels, name=group_name)
 
                 if text_channel is None or voice_channel is None:
-                    await ctx.respond('Sorry, that study group doesn\'t exist!', delete_after=60)
+                    await ctx.respond('Sorry, that study group doesn\'t exist!', delete_after=120)
                     return
 
                 # Check if author has permission to add a new member.
                 overwrite = text_channel.overwrites_for(ctx.author)
                 if overwrite.read_messages == False:
-                    await ctx.respond('Sorry, you don\'t have permissions to add a new member to this study group', delete_after=60)
+                    await ctx.respond('Sorry, you don\'t have permissions to add a new member to this study group', delete_after=120)
                     return
 
                 # Give permissions for all mentioned members.
                 await text_channel.set_permissions(mention, read_messages=True)
                 await voice_channel.set_permissions(mention, read_messages=True)
 
-                await ctx.respond(f'{mention} was added to the `{group_name}` study group.', delete_after=60)
+                await ctx.respond(f'{mention} was added to the `{group_name}` study group.', delete_after=120)
                 logging.info(f'User {ctx.author} added members to private study group "{group_name}": {mention}')
             else:
-                await ctx.respond(f'You need to mention a user if you want to add them to your study group.', delete_after=60)
+                await ctx.respond(f'You need to mention a user if you want to add them to your study group.', delete_after=120)
 
     # Print the message back.
     @bot.slash_command(guild_ids=[GUILD_ID])
