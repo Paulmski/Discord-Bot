@@ -88,12 +88,12 @@ class Course():
         '''Parses values from Google Sheet rows to set the object's state.'''
         
         parsed_data = parse_data(row_data, indexes)
-        now = datetime.now()
+        now = datetime.now().strftime(f'%Y-%m-%dT')
 
         # Convert EST times to GMT times conforming with ISO8601 formatting.
-        # Timezone translation UTC-05:00 to UTC+00:00.
-        gmt_start_time = datetime.strptime(now.strftime(f'%Y-%m-%dT') + parsed_data['start_time'], '%Y-%m-%dT%H:%M') + timedelta(hours=5)
-        gmt_end_time = datetime.strptime(now.strftime(f'%Y-%m-%dT') + parsed_data['end_time'], '%Y-%m-%dT%H:%M') + timedelta(hours=5)
+        # Timezone translation from UTC-05:00 to UTC+00:00.
+        gmt_start_time = datetime.strptime(now + parsed_data['start_time'], '%Y-%m-%dT%H:%M') + timedelta(hours=5)
+        gmt_end_time = datetime.strptime(now + parsed_data['end_time'], '%Y-%m-%dT%H:%M') + timedelta(hours=5)
             
         # 12-hour time conversions.
         th_start_time = datetime.strptime(parsed_data['start_time'], '%H:%M').strftime('%I:%M%p')
