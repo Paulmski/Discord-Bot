@@ -189,6 +189,7 @@ def main():
 
             # Create the new text and voice channels.
             text_channel = await ctx.guild.create_text_channel(group_name, category=study_category)
+            await text_channel.send(f'Welcome to the beginning of {group_name}!')
             voice_channel = await ctx.guild.create_voice_channel(group_name, category=study_category)
 
             # Set channel so that @everyone cannot see it.
