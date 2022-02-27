@@ -126,7 +126,7 @@ def main():
     # Command to create, modify permissions for, or delete private study groups.
     @bot.slash_command(guild_ids=[GUILD_ID])
     async def group(ctx, 
-                    command: Option(str, 'Create, delete, or add a group.', choices=['create', 'delete', 'add']), 
+                    command: Option(str, 'Create, delete, add, or leave a group.', choices=['create', 'delete', 'add', 'leave']), 
                     name_of_group: Option(str, 'The name of your group.'), 
                     mention1: Option(discord.User, 'Mention members you want to add to your group.')=None, 
                     mention2: Option(discord.User, 'Mention members you want to add to your group.')=None, 
@@ -137,7 +137,7 @@ def main():
         !group create [group_name] @users - Creates a private study group and invites the mentions.
         !group delete [group_name]        - Deletes a private study group you are in.
         !group add    [group_name] @users - Adds mentioned users to a study group you are in.
-
+        !group leave [group_name]         - Leave a study group you are in.
         Due to the limitations of slash commands, a variable number of mentions cannot be used in the command.
         '''
         
@@ -256,6 +256,19 @@ def main():
                 logging.info(f'User {ctx.author} added members to private study group "{group_name}": {mention}')
             else:
                 await ctx.respond(f'You need to mention a user if you want to add them to your study group.', delete_after=120)
+        elif command == 'leave':
+            for text_channel in ctx.guild.text_channels:
+                if text_channel.name == group_name:
+                    await text_channel.set_permissions(ctx.author, read_messages=False)
+                    break
+            for voice_channel in ctx.guild.voice_channels:
+                if voice_channel.name == group_name:
+                    await voice_channel.set_permissions(ctx.author, read_messages=False)
+                    await ctx.respond(f'You left group "{group_name}".', delete_after=120)
+                    return
+            await ctx.respond(f'You are not in a group named "{group_name}".')
+            
+
 
     # Print the message back.
     @bot.slash_command(guild_ids=[GUILD_ID])
