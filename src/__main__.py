@@ -85,9 +85,9 @@ def main():
         '''
         Returns the upcoming assignments within 14 days.
 
-        !list all             - Lists every assignment due in 14 days.
-        !list [code]          - Lists the course's assignments due in 14 days.
-        !list courses         - Lists all courses in the semester.
+        /list all             - Lists every assignment due in 14 days.
+        /list [code]          - Lists the course's assignments due in 14 days.
+        /list courses         - Lists all courses in the semester.
         '''
 
         if SPREADSHEET_ID is None or RANGE_NAME is None:
@@ -134,10 +134,10 @@ def main():
         '''
         Creates private study groups. Mention users you want to add to your group.
 
-        !group create [group_name] @users - Creates a private study group and invites the mentions.
-        !group delete [group_name]        - Deletes a private study group you are in.
-        !group add    [group_name] @users - Adds mentioned users to a study group you are in.
-        !group leave [group_name]         - Leave a study group you are in.
+        /group create [group_name] @users - Creates a private study group and invites the mentions.
+        /group delete [group_name]        - Deletes a private study group you are in.
+        /group add    [group_name] @users - Adds mentioned users to a study group you are in.
+        /group leave [group_name]         - Leave a study group you are in.
         Due to the limitations of slash commands, a variable number of mentions cannot be used in the command.
         '''
         
@@ -166,7 +166,7 @@ def main():
         for channel in ctx.interaction.guild.text_channels:
 
             if channel.category.name != 'study-groups' and channel.name == group_name:
-                await ctx.respond('You cannot call `!group` using other channels as arguments.', delete_after=120)
+                await ctx.respond('You cannot call `/group` using other channels as arguments.', delete_after=120)
                 logging.info(f'User {ctx.author} attempted to {command} a study group using an already-existing channel name, #{group_name}.')
                 return
 
@@ -277,7 +277,7 @@ def main():
         '''
         Repeats what you say and then deletes the message after 60 seconds.
 
-        !repeat After me.  - Bot responds with "After me."
+        /repeat After me.  - Bot responds with "After me."
         '''
         await ctx.respond(string, delete_after=60)
 
@@ -287,7 +287,7 @@ def main():
         '''
         Searches for a YouTube tutorial video based on your search query.
 
-        !search Python Django - Searches for a Python Django tutorial on YouTube and returns the URL.
+        /search Python Django - Searches for a Python Django tutorial on YouTube and returns the URL.
         '''
         arg_space = urllib.parse.quote(subject)
         html = urllib.request.urlopen('https://www.youtube.com/results?search_query={}'.format(arg_space))
