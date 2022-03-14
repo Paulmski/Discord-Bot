@@ -160,7 +160,7 @@ paramiko==2.9.1
 Paste==3.5.0
 pexpect==4.8.0
 pid==2.2.3
-Pillow==8.3.2
+Pillow==9.0.1
 pipreqs==0.4.11
 pkginfo==1.7.1
 platformdirs==2.2.0
