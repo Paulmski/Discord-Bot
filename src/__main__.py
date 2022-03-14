@@ -235,7 +235,7 @@ def main():
 
         # Add a new user to an already existing study group.
         elif command == 'add':
-            if mention is not None:
+            if len(mentions) != 0:
                 text_channel = discord.utils.get(ctx.guild.text_channels, name=group_name)
                 voice_channel = discord.utils.get(ctx.guild.voice_channels, name=group_name)
 
@@ -250,11 +250,11 @@ def main():
                     return
 
                 # Give permissions for all mentioned members.
-                await text_channel.set_permissions(mention, read_messages=True)
-                await voice_channel.set_permissions(mention, read_messages=True)
-
-                await ctx.respond(f'{mention} was added to the `{group_name}` study group.', delete_after=120)
-                logging.info(f'User {ctx.author} added members to private study group "{group_name}": {mention}')
+                for mention in mentions:
+                    await text_channel.set_permissions(mention, read_messages=True)
+                    await voice_channel.set_permissions(mention, read_messages=True)
+                    await ctx.respond(f'{mention} was added to the `{group_name}` study group.', delete_after=120)
+                    logging.info(f'User {ctx.author} added members to private study group "{group_name}": {mention}')
             else:
                 await ctx.respond(f'You need to mention a user if you want to add them to your study group.', delete_after=120)
         elif command == 'leave':
