@@ -1,8 +1,6 @@
 # file app/sheets_parser.py
 
 import logging
-from time import strftime
-from datetime import datetime, timedelta
 from classes.Assignment import Assignment
 from classes.Course import Course
 
