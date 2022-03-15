@@ -38,7 +38,8 @@ def main():
     service = gsapi_builder.build_service()
     COURSE_CODES = list(set([f'{course.code} - {course.name}' for course in sheets_parser.fetch_courses(service, SPREADSHEET_ID, COURSE_SHEET)]))
     COURSE_CODES.sort()
-    COURSE_CODES.insert(0, 'COURSES')
+    COURSE_CODES.insert(0, 'ALL')
+    COURSE_CODES.insert(1, 'COURSES')
 
     # Instantiate the bot.
     bot = Bot()
@@ -96,7 +97,9 @@ def main():
             return
 
         final_assignments = []
-        code = specify.upper().split()[0]
+        
+        # Code is given as a XXXX1234 - Name, so take the first part of the split string (XXXX1234)
+        code = specify.upper().split()[0] 
         assignments = sheets_parser.fetch_assignments(service, SPREADSHEET_ID, RANGE_NAME)
 
         message = '' # Message containing all specified courses.
@@ -269,8 +272,6 @@ def main():
                     return
             await ctx.respond(f'You are not in a group named "{group_name}".')
             
-
-
     # Print the message back.
     @bot.slash_command(guild_ids=[GUILD_ID])
     async def repeat(ctx, string):

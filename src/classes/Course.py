@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from dateutil.tz import *
 from .parse_data import parse_data
 
 # Class to represent course information.
@@ -90,10 +91,15 @@ class Course():
         parsed_data = parse_data(row_data, indexes)
         now = datetime.now().strftime(f'%Y-%m-%dT')
 
-        # Convert EST times to GMT times conforming with ISO8601 formatting.
-        # Timezone translation from UTC-05:00 to UTC+00:00.
-        gmt_start_time = datetime.strptime(now + parsed_data['start_time'], '%Y-%m-%dT%H:%M') + timedelta(hours=5)
-        gmt_end_time = datetime.strptime(now + parsed_data['end_time'], '%Y-%m-%dT%H:%M') + timedelta(hours=5)
+        # gettz().utcoffset(dt) gives a datetime.timedelta object with days and seconds properties.
+        utc_offset = gettz().utcoffset(datetime.now())
+
+        # Take the datetime.timedelta object's days and seconds, convert it into hours and store that value in a new datetime.timedelta object.
+        utc_offset = timedelta(hours=(utc_offset.days * 24 + utc_offset.seconds / 3600))
+
+        # Convert local time to GMT time conforming with ISO8601 formatting.
+        gmt_start_time = (datetime.strptime(now + parsed_data['start_time'], '%Y-%m-%dT%H:%M') - utc_offset).replace(tzinfo=timezone.utc)
+        gmt_end_time = (datetime.strptime(now + parsed_data['end_time'], '%Y-%m-%dT%H:%M') - utc_offset).replace(tzinfo=timezone.utc)
             
         # 12-hour time conversions.
         th_start_time = datetime.strptime(parsed_data['start_time'], '%H:%M').strftime('%I:%M%p')

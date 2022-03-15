@@ -84,7 +84,7 @@ class FetchDate(commands.Cog):
         '''Sends a Discord message with assignment due dates based on a Context channel or Announcements channel ID in .env.'''
 
         # Instantiate the Embed.
-        embedded_message = discord.Embed(title=title, colour=discord.Colour.from_rgb(160, 165, 25))
+        embedded_message = discord.Embed(title=title, colour=discord.Colour.from_rgb(200, 30, 35))
 
         await self.bot.wait_until_ready()
 
