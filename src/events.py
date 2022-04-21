@@ -1,3 +1,4 @@
+from turtle import st
 from discord.ext import tasks, commands
 import discord
 from time import sleep
@@ -8,6 +9,7 @@ import sheets_parser
 from discord.http import Route
 from dotenv import load_dotenv
 from classes.Assignment import Assignment
+import datetime
 
 load_dotenv()
 SPREADSHEET_ID = os.getenv('SPREADSHEET_ID')
@@ -16,6 +18,7 @@ COURSE_SHEET = os.getenv('COURSE_SHEET')
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 ANNOUNCEMENT_CHANNEL = os.getenv('ANNOUNCEMENT_CHANNEL')
 GUILD_ID = os.getenv('GUILD_ID')
+LOCAL_TIMEZONE = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
 
 # Declare the FetchDate class, inheriting methods from Cog.
 class FetchDate(commands.Cog):
@@ -33,7 +36,7 @@ class FetchDate(commands.Cog):
     async def fetch_due_dates(self):
 
         await self.bot.wait_until_ready()
-        if (datetime.now().hour != 6):
+        if (datetime.datetime.now(LOCAL_TIMEZONE).hour != 6):
             return
 
         channel = None
@@ -58,9 +61,6 @@ class FetchDate(commands.Cog):
 
         # Make a call to the @everyone event handler with the assignments array passed as an argument.
         if final_assignments != []:
-            # Delete the last announcement from this channel.
-            title = ':red_circle: Due Dates for Today :red_circle:'
-            previous_messages = await channel.history(limit=10).flatten()
             
             for message in previous_messages:
                 if len(message.embeds) > 0:
@@ -142,9 +142,9 @@ class FetchDate(commands.Cog):
 
         # Append the information to the course_assignments.
         if notes == '':
-            return f'\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}\n'
+            return f'\n**{name}**\nDue on {due_date}, {datetime.now(LOCAL_TIMEZONE).year}.\n{days_left}\n'
         else:
-            return f'\n**{name}**\nDue on {due_date}, {datetime.now().year}.\n{days_left}__Notes:__\n{notes}\n'
+            return f'\n**{name}**\nDue on {due_date}, {datetime.now(LOCAL_TIMEZONE).year}.\n{days_left}__Notes:__\n{notes}\n'
 
 # Declare EventScheduler Cog.
 class EventScheduler(commands.Cog):
@@ -164,8 +164,33 @@ class EventScheduler(commands.Cog):
     @tasks.loop(minutes=60.0)
     async def schedule_events(self):
         
-        if (datetime.now().hour != 6):
-            return
+
+        # Check if there is a break occuring
+        file = open('vacation.db', 'r')
+        #  Check file exists
+        if file != None:
+            # Since there is no guarantee as to the format of vacation.db access to it needs to be wrapped in a try/except
+            try:
+                date = file.readline().strip()
+                # Read date break would start and check it is not an empty line
+                if date == None: 
+                    file.close()
+                    return
+                date = datetime.datetime.strptime(date, '%Y-%m-%d')
+                period = int(file.readline().strip())
+                # Skip scheduling events if bot is on break still
+                if datetime.datetime.today() < date + datetime.timedelta(days=period):
+                    logging.info('The bot is on vacation so no events will be scheduled')
+                    return
+            except Exception:
+                # Couldn't read the file assume there is no vacation happening
+                pass
+                
+
+
+        # if (datetime.datetime.now(LOCAL_TIMEZONE).hour != 6):
+        #     return
+        
         
         await self.bot.wait_until_ready() # Bot needs to wait until ready, especially on the first iteration.
         # Set the class' guild state (bot.get_guild() returns a Guild object)
@@ -180,7 +205,7 @@ class EventScheduler(commands.Cog):
         # Post events using HTTP.
         route = Route('POST', f'/guilds/{GUILD_ID}/scheduled-events', guild_id=GUILD_ID)
 
-        now = datetime.now(timezone.utc)
+        now = datetime.datetime.now(LOCAL_TIMEZONE)
         current_day = now.strftime('%A') # Formatted for weekday's full name.
         for course in schedule:
             if course.day == current_day and course.start_time > now:
@@ -206,7 +231,7 @@ class EventScheduler(commands.Cog):
 
             if last_message is None: continue
 
-            now = datetime.now(timezone.utc)
+            now = datetime.now(LOCAL_TIMEZONE)
             time_diff = (now - last_message.created_at).total_seconds()
 
             # Study group inactive for 14 days will be deleted.
@@ -220,7 +245,6 @@ class EventScheduler(commands.Cog):
             elif time_diff > 13 * 24 * 60 * 60:
                 await channel.send('@everyone\nThis channel will be deleted if it is inactive for 1 more day.')
                 
-               
     @schedule_events.before_loop
     async def before_scheduling(self):
         logging.debug('Initiating event scheduler.')

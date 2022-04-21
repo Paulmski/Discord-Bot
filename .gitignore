@@ -131,3 +131,6 @@ dmypy.json
 # Sensitive information
 secrets.py
 *.json
+
+# Instance specific files
+vacation.db

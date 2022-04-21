@@ -16,6 +16,8 @@ def main():
     import events as events
     import urllib
     import re
+    import datetime
+
 
     random.seed()  # Seed the RNG.
     load_dotenv()
@@ -126,6 +128,17 @@ def main():
         await fetcher.announce_assignments(final_assignments, title, ctx)
         logging.info(f'User {ctx.author} requested assignments for {code}.')
 
+    @bot.slash_command(guild_ids=[GUILD_ID])
+    async def vacation(ctx, period: Option(int, 'Amount of days for bot to go on break')):
+        '''Tell the bot to go on a vacation, it won't send announcements while it's on break.'''
+        file = open('vacation.db', 'w+')
+        # Write date break started and the duration of it
+        today = datetime.date.today()
+        file.write(today.strftime('%Y-%m-%d') + '\n' + str(period))
+        file.close()
+        await ctx.respond('The bot will take a break until: ' + (today + datetime.timedelta(days=period)).strftime('%Y-%m-%d'))
+        logging.info(f'User {ctx.author} started a vacation for {period} days until: {(today + datetime.timedelta(days=period)).strftime("%Y-%m-%d")}')
+            
     # Command to create, modify permissions for, or delete private study groups.
     @bot.slash_command(guild_ids=[GUILD_ID])
     async def group(ctx, 
