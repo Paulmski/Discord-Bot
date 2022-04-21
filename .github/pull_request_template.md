@@ -21,7 +21,7 @@ You can detail what your pull request does in a major/minor changes list. Make n
 * Amendments to English text documents...
 
 ## Does the pull request leave any extra steps?
-Are there any additional steps required to complete the fix? If possible, point to the classes or framework in the `discord.py` documentation that would solve the problem.
+Are there any additional steps required to complete the fix? If possible, point to the classes or framework in the `Pycord` documentation that would solve the problem.
 A separate branch will be created for your pull request if it does not fully fix an issue.
 
 ### TODO:
