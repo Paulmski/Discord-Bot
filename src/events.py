@@ -188,8 +188,8 @@ class EventScheduler(commands.Cog):
                 
 
 
-        # if (datetime.datetime.now(LOCAL_TIMEZONE).hour != 6):
-        #     return
+        if (datetime.datetime.now(LOCAL_TIMEZONE).hour != 6):
+            return
         
         
         await self.bot.wait_until_ready() # Bot needs to wait until ready, especially on the first iteration.
