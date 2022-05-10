@@ -1,4 +1,3 @@
-from turtle import st
 from discord.ext import tasks, commands
 import discord
 from time import sleep
@@ -142,9 +141,9 @@ class FetchDate(commands.Cog):
 
         # Append the information to the course_assignments.
         if notes == '':
-            return f'\n**{name}**\nDue on {due_date}, {datetime.now(LOCAL_TIMEZONE).year}.\n{days_left}\n'
+            return f'\n**{name}**\nDue on {due_date}, {datetime.datetime.now(LOCAL_TIMEZONE).year}.\n{days_left}\n'
         else:
-            return f'\n**{name}**\nDue on {due_date}, {datetime.now(LOCAL_TIMEZONE).year}.\n{days_left}__Notes:__\n{notes}\n'
+            return f'\n**{name}**\nDue on {due_date}, {datetime.datetime.now(LOCAL_TIMEZONE).year}.\n{days_left}__Notes:__\n{notes}\n'
 
 # Declare EventScheduler Cog.
 class EventScheduler(commands.Cog):
@@ -231,7 +230,7 @@ class EventScheduler(commands.Cog):
 
             if last_message is None: continue
 
-            now = datetime.now(LOCAL_TIMEZONE)
+            now = datetime.datetime.now(LOCAL_TIMEZONE)
             time_diff = (now - last_message.created_at).total_seconds()
 
             # Study group inactive for 14 days will be deleted.
