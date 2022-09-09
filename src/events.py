@@ -236,7 +236,10 @@ class EventScheduler(commands.Cog):
             # Study group inactive for 14 days will be deleted.
             if time_diff > 14 * 24 * 60 *60:
                 voice_channel = discord.utils.get(guild.voice_channels, name=channel.name)
-                await voice_channel.delete()
+                if voice_channel is not None:
+                    await voice_channel.delete()
+                else:
+                    logging.info("The voice channel called '{}' was attempted to be deleted but did not exist.")
                 await channel.delete()
                 logging.info(f'Study group "{channel.name}" was removed due to inactivity.')
             elif time_diff > 14 * 23 * 60 * 60:
