@@ -60,7 +60,9 @@ class FetchDate(commands.Cog):
 
         # Make a call to the @everyone event handler with the assignments array passed as an argument.
         if final_assignments != []:
-            
+           # Delete the last announcement from this channel.
+            title = ':red_circle: Due Dates for Today :red_circle:'
+            previous_messages = await channel.history(limit=10).flatten() 
             for message in previous_messages:
                 if len(message.embeds) > 0:
                     if message.embeds[0].title == title:
@@ -236,7 +238,10 @@ class EventScheduler(commands.Cog):
             # Study group inactive for 14 days will be deleted.
             if time_diff > 14 * 24 * 60 *60:
                 voice_channel = discord.utils.get(guild.voice_channels, name=channel.name)
-                await voice_channel.delete()
+                if voice_channel is not None:
+                    await voice_channel.delete()
+                else:
+                    logging.info("The voice channel called '{}' was attempted to be deleted but did not exist.")
                 await channel.delete()
                 logging.info(f'Study group "{channel.name}" was removed due to inactivity.')
             elif time_diff > 14 * 23 * 60 * 60:
