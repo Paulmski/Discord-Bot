@@ -60,7 +60,9 @@ class FetchDate(commands.Cog):
 
         # Make a call to the @everyone event handler with the assignments array passed as an argument.
         if final_assignments != []:
-            
+           # Delete the last announcement from this channel.
+            title = ':red_circle: Due Dates for Today :red_circle:'
+            previous_messages = await channel.history(limit=10).flatten() 
             for message in previous_messages:
                 if len(message.embeds) > 0:
                     if message.embeds[0].title == title:
